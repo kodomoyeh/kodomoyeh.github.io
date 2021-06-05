@@ -172,17 +172,16 @@
 <polygon id="x38_3" class="svgblock" fill="#777777" points="0,43 43,43 43,86 0,86 0,129 86,129 86,0 0,0 "/>
 <polygon id="x38_4" class="svgblock" fill="#777777" points="86,43 43,43 43,86 86,86 86,129 0,129 0,0 86,0 "/>
 </svg>  
-  <!--<object id="apad-map" data="apad.svg" type="image/svg+xml">
-  </object>-->
+
   
 </div>
-      <span id="apad-start" style="float: left; font-family: Consolas, monospace;"></span>
+      
       <span id="apad" style="float: left; font-family: Consolas, monospace;"></span>
 
       <br/>
     
       <script src="csp.js"></script>
-      <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+      <script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
       <script>
 		$(document).ready(function() {
@@ -473,8 +472,8 @@
 		}
 		console.log(mm+' / '+dd);
         
-			INIT = -1;
-			LIMIT = 0;
+			INIT = 0;
+			LIMIT = 9;
             SIZE = 7;
 	
             board = [];
@@ -499,6 +498,7 @@
      }
 
       function solve_apad() {
+	  document.getElementById('apad-button').disabled = true;
          var SIZE = 7,
              apad = {}, variables = {}, constraints = [],
              filled_in = generate_apad();
@@ -514,47 +514,52 @@
 				m = block.length;
 				n = (m>0)?block[0].length:0;
 				return (x < (8-m) && y < (8-n));
-				/*switch (type)
-				{
-				case 1://orange
-					if(direction < 5 )
-						return (x < 6 && y < 4);
-					else
-						return (x < 4 && y < 6);
-				case 2://blue
-					if(direction == 1 )
-						return (x < 6 && y < 5);
-					else
-						return (x < 5 && y < 6);
-				case 3://purple
-					if(direction < 5 )
-						return (x < 6 && y < 4);
-					else
-						return (x < 4 && y < 6);
-				case 4://green
-						return (x < 5 && y < 5);
-				case 5://yellow
-						return (x < 5 && y < 5);
-				case 6://red
-					if(direction < 5 )
-						return (x < 6 && y < 4);
-					else
-						return (x < 4 && y < 6);
-				case 7://pink
-					if(direction < 5 )
-						return (x < 6 && y < 5);
-					else
-						return (x < 5 && y < 6);
-				case 8://gray
-					if(direction < 3 )
-						return (x < 6 && y < 5);
-					else
-						return (x < 5 && y < 6);
-				}
-				return false;*/
+	
 			}
 			
-			function noHitLimitation(b ) { // check not out of boundary
+			function noHitLimitation(b ) { // check not hit limitation
+				var x = b[0];
+				var y = b[1];
+				var type = b[2];
+				var direction = b[3];
+				var block,m,n;
+				block = getBlock(type*10+direction);
+				
+				m = block.length;
+				n = (m>0)?block[0].length:0;
+				for (var i=0;i<m;i++ )
+				for (var j=0;j<n;j++ )
+				{
+					if(block[i][j]>0)
+						if(filled_in[x+i][y+j]==LIMIT) return false;
+				}
+				
+				return true;
+				
+			}
+			
+			function connectedvals(array,  x, y)
+			{
+				var count =0;
+				if (array[x][y] != 0 )
+					return 0;
+				array[x][y] = 1;
+				count++;
+
+				if (y + 1 < SIZE)
+					count+=connectedvals(array,  x + 0, y + 1);
+				if (y - 1 >= 0)
+					count+=connectedvals(array,  x + 0, y - 1);
+				if (x + 1 < SIZE)
+					count+=connectedvals(array,  x + 1, y + 0);
+				if (x - 1 >= 0)
+					count+=connectedvals(array,  x - 1, y + 0);
+					
+				return count;
+			}
+			
+			
+			function noCreateIsolate(b ) { // check not create isolative area
 				var x = b[0];
 				var y = b[1];
 				var type = b[2];
@@ -581,13 +586,15 @@
 				
 				if(inbox(b1)&&noHitLimitation(b1)&&inbox(b2)&&noHitLimitation(b2))
 				{
-					var safe_field = [];
+					var safe_field = [];//filled_in.slice();//NG
 					for (var i=0;i<SIZE;i++ ){
 						var row = [];
 						for (var j=0;j<SIZE;j++ )
 						{
-							row.push(0);
-							//safe_field[i][j]=0;
+							if(filled_in[i][j]==LIMIT)
+								row.push(LIMIT);
+							else
+								row.push(0);
 						}
 						safe_field.push(row);
 					}
@@ -604,7 +611,7 @@
 					for (var j=0;j<n1;j++ )
 					{
 						if(block1[i][j]>0)
-							safe_field[x1+i][y1+j]=1;
+							safe_field[x1+i][y1+j]=type1;
 					}
 					
 					var x2 = b2[0];
@@ -620,7 +627,24 @@
 					for (var j=0;j<n2;j++ )
 					{
 						if(block2[i][j]>0)
+						{
 							if(safe_field[x2+i][y2+j]>0) return false;
+							safe_field[x2+i][y2+j]=type2;
+						}
+						
+					}
+					for (var i=0;i<SIZE;i++ ){
+						for (var j=0;j<SIZE;j++ )
+						{
+							if(safe_field[i][j]==INIT)
+							{
+								var result = connectedvals(safe_field.slice(),  i, j);
+								if(result<5 || result %5 >1)
+									return false;
+							}
+		
+						}
+						
 					}
 					//console.log(JSON.stringify(b1)+" safe to "+JSON.stringify(b2));
 					return true;
@@ -678,8 +702,10 @@
             for (var j = 0; j < SIZE; j++) {
               text += '|';
               var mid = filled_in[i][j];
-			  if(mid<0)
+			  if(mid==INIT)
 				text += '&nbsp; ' + '?' + ' &nbsp;';
+			  else if(mid==LIMIT)
+				text += '&nbsp; ' + 'X' + ' &nbsp;';
 			  else
 				text += '&nbsp; ' + mid + ' &nbsp;';
             }
@@ -688,7 +714,9 @@
 			   return text;
          }
 		 var node = document.getElementById('apad');
+		 var vis_count = 0;
 		function visualize(assigned) {
+			vis_count ++;
 			//console.log("vis->" + JSON.stringify(assigned));
 	
 			var appBanners = document.getElementsByClassName('svgblock');
@@ -736,6 +764,8 @@
 			if(count==8)
 			{
 			console.log("vis->" + JSON.stringify(assigned));
+			console.log("total count " + vis_count + " times");
+			vis_count
 			}
 			//$("#drawbase").html($("#drawbase").html());
 				var text = '', divider = '';
@@ -745,10 +775,12 @@
 				for (var j = 0; j < SIZE; j++) {
 					text += '|';
 					var mid = filled_in[i][j];
-					if(mid<0)
-						text += '&nbsp; ' + '?' + ' &nbsp;';
-					else
-						text += '&nbsp; ' + mid + ' &nbsp;';
+				if(mid==INIT)
+					text += '&nbsp; ' + '?' + ' &nbsp;';
+				else if(mid==LIMIT)
+					text += '&nbsp; ' + 'X' + ' &nbsp;';
+				else
+					text += '&nbsp; ' + mid + ' &nbsp;';
 				}
 				text += '|<br/>' + divider + '<br/>'
 			}
@@ -757,9 +789,8 @@
 		}
 
          apad.cb = visualize;
-         apad.timeStep = 5;
+         apad.timeStep = 50;
 
-         document.getElementById('apad-start').innerHTML = visualize_original(filled_in);
          visualize({});
          var result = csp.solve(apad);
          if (result == 'FAILURE') { console.log(result); }
