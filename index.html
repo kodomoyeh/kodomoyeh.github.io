@@ -775,7 +775,7 @@
 			{
 			console.log("vis->" + JSON.stringify(assigned));
 			console.log("total count " + vis_count + " times");
-			dataLayer.push({'event':'visual_complete','vis_count':vis_count});
+			ga('send', 'event', 'Analysis', 'visual_complete', 'vis_count', vis_count);
 			}
 			//$("#drawbase").html($("#drawbase").html());
 				var text = '', divider = '';
