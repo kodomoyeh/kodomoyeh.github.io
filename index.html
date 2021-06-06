@@ -482,6 +482,10 @@
 		}
 		console.log(mm+' / '+dd);
 		//ga('send', 'event', 'Analysis', 'generate_apad', 'mmdd', mm+' / '+dd);
+		gtag('event', 'generate_apad', {
+		  'event_category': 'Analysis',
+		  'mmdd': mm+' / '+dd
+		});
         
 			INIT = 0;
 			LIMIT = 9;
@@ -777,6 +781,10 @@
 			console.log("vis->" + JSON.stringify(assigned));
 			console.log("total count " + vis_count + " times");
 			//ga('send', 'event', 'Analysis', 'visual_complete', 'vis_count', vis_count);
+			gtag('event', 'visual_complete', {
+				'event_category': 'Analysis',
+				'vis_count': vis_count
+			});
 			}
 			//$("#drawbase").html($("#drawbase").html());
 				var text = '', divider = '';
