@@ -575,26 +575,7 @@
 			}
 			
 			
-			function noCreateIsolate(b ) { // check not create isolative area
-				var x = b[0];
-				var y = b[1];
-				var type = b[2];
-				var direction = b[3];
-				var block,m,n;
-				block = getBlock(type*10+direction);
-				
-				m = block.length;
-				n = (m>0)?block[0].length:0;
-				for (var i=0;i<m;i++ )
-				for (var j=0;j<n;j++ )
-				{
-					if(block[i][j]>0)
-						if(filled_in[x+i][y+j]==LIMIT) return false;
-				}
-				
-				return true;
-				
-			}
+
 		 
          
 		 
@@ -670,7 +651,7 @@
 			return false;
 		 }
 		 
-			var BLOCK_TYPES = 8;//debug2;
+			var BLOCK_TYPES = 8;
 			for (var k = 1; k <= BLOCK_TYPES; k++){
 				for (var k2 = 1; k2 <= BLOCK_TYPES; k2++) {
 					if (k2 != k) {
@@ -708,27 +689,6 @@
          apad.constraints = constraints;
 
          
-		 
-		 function visualize_original() {
-		 //console.log("vis->" + JSON.stringify(assigned));
-			var text = '', divider = '';
-          for (var i = 0; i < SIZE * 6 + 1; i++) { divider += '-'; }
-          text += divider + '<br/>'
-          for (var i = 0; i < SIZE; i++) {
-            for (var j = 0; j < SIZE; j++) {
-              text += '|';
-              var mid = filled_in[i][j];
-			  if(mid==INIT)
-				text += '&nbsp; ' + '?' + ' &nbsp;';
-			  else if(mid==LIMIT)
-				text += '&nbsp; ' + 'X' + ' &nbsp;';
-			  else
-				text += '&nbsp; ' + mid + ' &nbsp;';
-            }
-            text += '|<br/>' + divider + '<br/>'
-          }
-			   return text;
-         }
 		 var node = document.getElementById('apad');
 		 var vis_count = 0;
 		function visualize(assigned) {
