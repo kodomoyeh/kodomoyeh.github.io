@@ -4,7 +4,38 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>A Puzzle A Day</title>
+<style>
+	.dialog {
+      width:350px;
+      position: absolute;
+      z-index: 9;
+      background-color: #ceeaec;
+      border: 4px solid #6263ad;
 
+
+    }
+    #dialog_log {
+    overflow: auto;
+    height: 500px;
+        padding: 21px;
+    }
+
+    #dialog_log > p {
+        padding: 0px;
+        margin: 0px;
+        font-size: 14px;
+    }
+    .anchor {
+      width:10px;
+      height:10px;
+      padding: 10px;
+      cursor: move;
+      z-index: 10;
+      background-color: #2196F3;
+      color: #fff;
+      border-radius: 100%;
+    }
+</style>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 	<meta property="og:image" content="https://kodomoyeh.github.io/apad.png" />
 	<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
@@ -21,6 +52,16 @@
 </script>
   </head>
   <body>
+
+	<div id="route_1" class="dialog">
+    <div id="route_1header" class="anchor" ></div>
+    <div id="dialog_log">
+        <p>Kodomo</p>
+        <p>say</p>
+        <p>hi !</p>
+    </div>
+	</div>
+
     <div class="wrapper">
       <header>
         <h1 class="header">A Puzzle A Day</h1>
@@ -192,15 +233,68 @@
       <br/>
     
       <script src="csp.js"></script>
-      <script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
       <script>
+	  function dragElement(elmnt) {
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  var top_pos = 0, left_pos = 0;
+  var target_element;
+  if (document.getElementById(elmnt.id + "header")) {
+    // if present, the header is where you move the DIV from:
+    document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+  } else {
+    // otherwise, move the DIV from anywhere inside the DIV:
+    elmnt.onmousedown = dragMouseDown;
+  }
+
+  function dragMouseDown(e) {
+	  target_element = elmnt;
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    // set the element's new position:
+	  top_pos = (elmnt.offsetTop - pos2) + "px";
+	  left_pos = (elmnt.offsetLeft - pos1) + "px"
+    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+  }
+
+  function closeDragElement() {
+    // stop moving when mouse button is released:
+	  console.log(top_pos + "  , "+left_pos);
+	  console.log(target_element.id);
+    document.onmouseup = null;
+    document.onmousemove = null;
+	  target_element = null;
+  }
+}
+
 		$(document).ready(function() {
   
 			var appBanners = document.getElementsByClassName('svgblock');
 			for (var i = 0; i < appBanners.length; i ++) {
 				appBanners[i].style.display = 'none';
 			}//hide all first
+
+
+	  dragElement(document.getElementById("route_1"));
+
 		});
 	  
       (function () {
@@ -778,6 +872,7 @@
        
        document.getElementById('apad-button').onclick =  solve_apad;//function () 
       })();
+
       </script>
 
 
