@@ -7,16 +7,25 @@
 <style>
 	.dialog {
       width:350px;
-      position: absolute;
+	  height:250px;
+	  position: absolute;
       z-index: 9;
-      background-color: #ceeaec;
-      border: 4px solid #6263ad;
 
 
     }
+	
+	.dialog-b {
+	  width:100%;
+	  height:100%;
+      background-color: #ceeaec;
+      border: 4px solid #6263ad;
+	}
+	
+	
+	
     #dialog_log {
     overflow: auto;
-    height: 500px;
+
         padding: 21px;
     }
 
@@ -34,6 +43,18 @@
       background-color: #2196F3;
       color: #fff;
       border-radius: 100%;
+    }
+    .anchor_tail {
+      width:10px;
+      height:10px;
+      padding: 10px;
+      cursor: nwse-resize;
+      z-index: 10;
+      background-color: #2196F3;
+      color: #fff;
+      border-radius: 100%;
+	  float: right;
+	  bottom: 0;
     }
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
@@ -54,12 +75,16 @@
   <body>
 
 	<div id="route_1" class="dialog">
+	<div id="route_1" class="dialog-b">
     <div id="route_1header" class="anchor" ></div>
     <div id="dialog_log">
         <p>Kodomo</p>
         <p>say</p>
         <p>hi !</p>
     </div>
+	
+	</div>
+	<div id="route_1tailer" class="anchor_tail" ></div>
 	</div>
 
     <div class="wrapper">
@@ -239,6 +264,8 @@
 	  function dragElement(elmnt) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
   var top_pos = 0, left_pos = 0;
+  var pos5 = 0, pos6 = 0, pos7 = 0, pos8 = 0;
+  var div_h = 0, div_w = 0;
   var target_element;
   if (document.getElementById(elmnt.id + "header")) {
     // if present, the header is where you move the DIV from:
@@ -246,6 +273,14 @@
   } else {
     // otherwise, move the DIV from anywhere inside the DIV:
     elmnt.onmousedown = dragMouseDown;
+  }
+  
+   if (document.getElementById(elmnt.id + "tailer")) {
+    // if present, the header is where you move the DIV from:
+	document.getElementById(elmnt.id + "tailer").onmousedown = resizeMouseDown;
+  } else {
+    // otherwise, move the DIV from anywhere inside the DIV:
+	elmnt.onmousedown = resizeMouseDown;
   }
 
   function dragMouseDown(e) {
@@ -258,6 +293,19 @@
     document.onmouseup = closeDragElement;
     // call a function whenever the cursor moves:
     document.onmousemove = elementDrag;
+  }
+  
+  function resizeMouseDown(e) {
+	  target_element = elmnt;
+	  console.log(elmnt.offsetWidth+" , "+elmnt.offsetHeight)
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos7 = e.clientX;
+    pos8 = e.clientY;
+    document.onmouseup = closeResizeElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementResize;
   }
 
   function elementDrag(e) {
@@ -274,6 +322,26 @@
     elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
     elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
   }
+  
+  function elementResize(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos5 = pos7 - e.clientX;
+    pos6 = pos8 - e.clientY;
+    pos7 = e.clientX;
+    pos8 = e.clientY;
+	
+    // set the element's new position:
+      div_w = (elmnt.offsetWidth  - pos5) + "px"
+	  div_h = (elmnt.offsetHeight  - pos6) + "px";
+    elmnt.style.width = (elmnt.offsetWidth - pos5 ) + "px";
+    elmnt.style.height = (elmnt.offsetHeight - pos6) + "px";
+
+	console.log(pos5+","+pos6+" ; "+pos7+","+pos8);
+	console.log("xxxxxxxx"+elmnt.offsetWidth+","+elmnt.offsetHeight);
+	//console.log("---->"+div_h+","+div_w);
+  }
 
   function closeDragElement() {
     // stop moving when mouse button is released:
@@ -283,6 +351,16 @@
     document.onmousemove = null;
 	  target_element = null;
   }
+
+  function closeResizeElement() {
+    // stop moving when mouse button is released:
+	  console.log(div_w + "  , "+div_h);
+	  console.log(target_element.id);
+    document.onmouseup = null;
+    document.onmousemove = null;
+	  target_element = null;
+  }
+  
 }
 
 		$(document).ready(function() {
