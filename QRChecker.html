@@ -47,5 +47,17 @@
 <h1>會議時間到</h1>
 <p>等訪客到場時 工作人員掃描訪客出示的 QR code 就會在Google 表單對應的  C欄裡面留下 timestamp</p>
 <img src="./img/pic6.png">
+<p>
+<p>
+<p>
+<h1>技術細節</h1>
+<p>我有使用 Google Drive API 以及 Google Sheets API 細節如下</p>
+<img src="./img/scope.png">
+<p>主要是我想要讓所有的資料都放在使用者私人的 google 表單中作業</p>
+<p>drive.readonly 為了讓使用者能瀏覽自己的檔案並選擇</p>
+<p>dspreadsheets 為了讓QRChecker能讀取之前選擇的檔案 以及在C欄加上 timestamp </p>
+<p>每次建立會議QRChecker只會去針對選擇的 Google 表單做讀取以及編輯</p>
+<p>且這些動作一定要是 QRChecker 在前景才會有動作</p>
+<p>有資安一律可以將原本選擇的 Google 表單在使用完成做刪除</p>
 </body>
 </html>
