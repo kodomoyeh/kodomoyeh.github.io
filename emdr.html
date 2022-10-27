@@ -319,18 +319,57 @@ flex: 1 1 auto;
 			//$.cookie('subscripted_24', true, { expires: 2147483647 });
 			console.log('ready' + document.cookie);
 			document.cookie = 'user=Kodomo; path=/; expires=Tue, 19 Jan 2038 03:14:07 GMT';
-			var  v = getCookie('user1');
+			/*var  v = getCookie('user1');
 			if(v)
 				console.log('user1 = ' + v);
 			else
 					console.log('user1 no value ');
-			
-			
-			
+			*/
 			var harmo = getCookie('harmonic');
 			if(harmo && harmo >0 )
 			{
 				$('#harmonic').prop('checked', true);
+			}
+			var bpm = getCookie('bpm');
+			if(bpm && bpm >=30 $$ bpm<=240)
+			{
+				$('#bpmInput').val(bpm);
+				$('#bpmOut').text(bpm + " BPM");
+			}
+			
+			var type = getCookie('type');
+			var minute = getCookie('minute');
+			var count = getCookie('count');
+			if(type)
+			{
+				if(type == 0)
+					$("#labelInfinite").click();
+				if(type == 1)
+				{
+					if(minute)
+					{
+						$("#bMinute").val(minute);
+						var v = $('#bpmInput').val() * $('#bMinute').val()
+						$('#bCount').val(v);
+					}
+				}
+				if(type == 2)
+				{
+					if(count)
+					{
+						$("#bCount").val(count);
+						$('#bMinute').val(-1);
+					}
+				}
+			
+			}
+			
+			var color = getCookie('color');
+			if(color)
+			{
+				$('#mainColor').val(color);
+				console.log(color);
+				$('#animate').css('background-color', color);
 			}
 			
         });
