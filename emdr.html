@@ -44,8 +44,8 @@
 
 label {
   display: inline-block;
-  width: 6em;
-  margin-right: .5em;
+  width: 5.7em;
+  margin-right: .2em;
 
 }
 	
@@ -60,7 +60,7 @@ label {
 	.pad {
 		background: rgb(251,251,251);
 		border-radius: 4px;
-		padding: 8px 58px 8px 8px;
+		padding: 8px 8px 8px 8px;
 	}
 	
 	.play {
@@ -68,7 +68,8 @@ label {
 	}
 	
 	.subpad {
-	
+		align-items: center;
+		display: flex;
 		height:200px;
 		padding: 20px;
 	}
@@ -185,17 +186,40 @@ input:checked + .slider:before {
         max-width: 100px;
     }
 	
-    #dialog_log {
-    overflow: auto;
-flex: 1 1 auto;
-        padding: 21px;
-    }
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
 
-    #dialog_log > p {
-        padding: 0px;
-        margin: 0px;
-        font-size: 14px;
-    }
+/* Style the buttons that are used to open the tab content */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.subpad {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-bottom: none;
+}
 
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
@@ -233,6 +257,10 @@ flex: 1 1 auto;
 	</div>
 	<div class="subpad" id="slide">
 		<div class="square" id="animate"></div>
+	</div>
+	<div class="tab">
+	  <button class="tablinks" onclick="openTab(event, 'slide')" id="defaultOpen"><i class="fa-solid fa-arrows-left-right"></i></button>
+	  <button class="tablinks" onclick="openTab(event, 'dot')" id="dot"><i class="fa-regular fa-circle-dot"></i></button>
 	</div>
 </div>
 
@@ -314,9 +342,40 @@ flex: 1 1 auto;
 		  if (parts.length === 2) return parts.pop().split(';').shift();
 		}
 		
+		function openTab(evt, tabName) {
+			if(tabName=='slide')
+				document.cookie = 'tab=0';
+			if(tabName=='dot')
+				document.cookie = 'tab=1';
+		  // Declare all variables
+		  var i, tabcontent, tablinks;
+
+		  // Get all elements with class="tabcontent" and hide them
+		  tabcontent = document.getElementsByClassName("subpad");
+		  for (i = 0; i < tabcontent.length; i++) {
+			tabcontent[i].style.display = "none";
+		  }
+
+		  // Get all elements with class="tablinks" and remove the class "active"
+		  tablinks = document.getElementsByClassName("tablinks");
+		  for (i = 0; i < tablinks.length; i++) {
+			tablinks[i].className = tablinks[i].className.replace(" active", "");
+		  }
+
+		  // Show the current tab, and add an "active" class to the button that opened the tab
+		  document.getElementById(tabName).style.display = "flex";
+			if(evt.target.localName == 'i')
+				evt.target.parentElement.className += " active";
+			else
+				evt.target.className += " active";
+		  //console.log(evt);
+		  //$('#'+tabName).addClass("active");
+		}
+		
 		$(document).ready(function(){
 			//import Cookies from 'js-cookie'
 			//$.cookie('subscripted_24', true, { expires: 2147483647 });
+			
 			console.log('ready' + document.cookie);
 			document.cookie = 'user=Kodomo; path=/; expires=Tue, 19 Jan 2038 03:14:07 GMT';
 			/*var  v = getCookie('user1');
@@ -370,6 +429,27 @@ flex: 1 1 auto;
 				$('#mainColor').val(color);
 				console.log(color);
 				$('#animate').css('background-color', color);
+			}
+			
+			var tab = getCookie('tab');
+			if(tab && tab<2 )
+			{
+				//$('#mainColor').val(color);
+				console.log(tab);
+				if(tab==0)
+				{
+					$("#defaultOpen").click();
+				}
+				if(tab==1)
+				{
+					$("#dot").click();
+				}
+				
+				//$('#animate').css('background-color', color);
+			}
+			else
+			{
+				$("#defaultOpen").click();
 			}
 			
         });
