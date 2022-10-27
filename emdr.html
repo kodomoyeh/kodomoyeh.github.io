@@ -87,17 +87,20 @@ label {
 	}
 	
 	#start {
-    background-color: #4CAF50; /* Green */
-    border: none;
-    color: white;
-    padding: 15px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-	border-radius: 4px;
-	float: right;
-   
+		background-color: #4CAF50; /* Green */
+		border: none;
+		color: white;
+		padding: 15px 32px;
+		text-align: center;
+		text-decoration: none;
+		display: inline-block;
+		font-size: 16px;
+		border-radius: 4px;
+		float: right;
+	}
+	
+	.stop {
+		background-color: #ee2b2b;
 	}
 	
 	#bpmInput {
@@ -296,11 +299,27 @@ flex: 1 1 auto;
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
       <script>
+	  function setRunning(isrun){
+		if(isrun)
+		{
+			$('#start').css('background-color', '#ee2b2b');
+			$('#start > i').removeClass("fa-play");
+			$('#start > i').addClass("fa-stop");
+		}
+		else
+		{
+			$('#start').css('background-color', '#4CAF50');
+			$('#start > i').removeClass("fa-stop");
+			$('#start > i').addClass("fa-play");
+		}
+	  }
+	  
 		var running =false;
 		$("#start").click(function(){
 			if(!running)
 			{
 				running = true;
+				setRunning(running);
 				let id = null;
 				var bpm = document.getElementById("bpmInput").value;
 				var harmonic = document.getElementById("harmonic").checked;
@@ -341,6 +360,7 @@ flex: 1 1 auto;
 				}
 				else
 				{
+					elem.style.left = "0%"; 
 					clearInterval(id);
 				}
 				}
@@ -348,6 +368,7 @@ flex: 1 1 auto;
 			else
 			{
 				running = false;
+				setRunning(running);
 			}
 			//alert("The text has been changed.");
 		});
@@ -381,7 +402,7 @@ flex: 1 1 auto;
 		});
 		$("#mainColor").change(function(){
 			var v = document.getElementById("mainColor").value;
-			//console.log(v);
+			console.log(v);
 			$('#animate').css('background-color', v);
 		});
 		
