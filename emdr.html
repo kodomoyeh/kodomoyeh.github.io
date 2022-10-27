@@ -31,10 +31,7 @@
 	}
 	
 	.colorButton{
-
-
 	  top: 0px;
-
 	}
 	
 
@@ -308,14 +305,16 @@ flex: 1 1 auto;
 </div>
 
 
-
-
-
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-
+	
     <script>
+		
 		$(document).ready(function(){
+			//import Cookies from 'js-cookie'
+			//$.cookie('subscripted_24', true, { expires: 2147483647 });
+			console.log('ready' + document.cookie);
+			document.cookie = 'user=Kodomo; path=/; expires=Tue, 19 Jan 2038 03:14:07 GMT';
+		
 			
         });
 	  
@@ -402,10 +401,18 @@ flex: 1 1 auto;
 		$("#harmonic").change(function(){
 			var v = document.getElementById("harmonic").checked;
 			console.log(v);
+
 			if(v)
+			{
 				document.getElementById("moveTypeOut").textContent = "Simple Harmonic Motion";
+				document.cookie = 'harmonic=1';
+			}
 			else
+			{
 				document.getElementById("moveTypeOut").textContent = "Static Speed";
+				document.cookie = 'harmonic=0';
+			}
+
 		});
 		$("#keyMinus").click(function(){
 			var v = document.getElementById("bpmInput").value;
