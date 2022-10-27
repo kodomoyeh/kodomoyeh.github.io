@@ -408,37 +408,42 @@ flex: 1 1 auto;
 				id = setInterval(frame, 5);
 				var count = $('#bCount').val();
 				function frame() {
-				if (pos > 100) {
-					step *= -1;
-					pos+=step;
-					count--;
-				  //clearInterval(id);
-				} else if (pos < 0) {
-					step *= -1;
-					pos+=step;
-					count--;
-				  //clearInterval(id);
-				}
-			
-				if(running && count != 0){
-				  pos+=step; 
-				  if(harmonic)
-				  {
-					  var hpos=-50.0*Math.cos(pos/100.0*Math.PI)+50; 
+					if (pos > 100) {
+						step *= -1;
+						pos+=step;
+						count--;
+					  //clearInterval(id);
+					} else if (pos < 0) {
+						step *= -1;
+						pos+=step;
+						count--;
+					  //clearInterval(id);
+					}
+				
+					if(running && count != 0){
+					  pos+=step;
+					  if(harmonic)
+					  {
+						  var hpos=-50.0*Math.cos(pos/100.0*Math.PI)+50; 
+						  
+						  elem.style.left = hpos + "%"; 
+					  }
+					  else
+					  {
+							elem.style.left = pos + "%"; 
+					  }
 					  
-					  elem.style.left = hpos + "%"; 
-				  }
-				  else
-				  {
-						elem.style.left = pos + "%"; 
-				  }
-				  
-				}
-				else
-				{
-					elem.style.left = "0%"; 
-					clearInterval(id);
-				}
+					}
+					else
+					{
+						elem.style.left = "50%";
+						clearInterval(id);
+						if(running)
+						{
+							running = false;
+							setRunning(running);
+						}
+					}
 				}
 			}
 			else
@@ -452,6 +457,7 @@ flex: 1 1 auto;
 		$("#bpmInput").change(function(){
 			var v = document.getElementById("bpmInput").value;
 			//console.log(v);
+			document.cookie = 'bpm='+v;
 			document.getElementById("bpmOut").textContent = v +" BPM";
 		});
 		$("#harmonic").change(function(){
@@ -475,6 +481,7 @@ flex: 1 1 auto;
 			v--;
 			console.log(v);
 			document.getElementById("bpmInput").value = v;
+			document.cookie = 'bpm='+v;
 			document.getElementById("bpmOut").textContent = v +" BPM";
 		});
 		$("#keyPlus").click(function(){
@@ -482,15 +489,18 @@ flex: 1 1 auto;
 			v++;
 			console.log(v);
 			document.getElementById("bpmInput").value = v;
+			document.cookie = 'bpm='+v;
 			document.getElementById("bpmOut").textContent = v +" BPM";
 		});
 		$("#mainColor").change(function(){
 			var v = document.getElementById("mainColor").value;
+			document.cookie = 'color='+v;
 			console.log(v);
 			$('#animate').css('background-color', v);
 		});
 		
 		$("#labelInfinite").click(function(){
+			document.cookie = 'type=0';
 			$('.upcontent').removeClass("focus");
 			$('#bInfinite').addClass("focus");
 			$('#bMinute').val(-1);
@@ -498,11 +508,13 @@ flex: 1 1 auto;
 		});
 		
 		$("#labelMinute").click(function(){
+			document.cookie = 'type=1';
 			$('.upcontent').removeClass("focus");
 			$('#bMinute').addClass("focus");
 		});
 		
 		$("#labelCount").click(function(){
+			document.cookie = 'type=2';
 			$('.upcontent').removeClass("focus");
 			$('#bCount').addClass("focus");
 		});
@@ -510,6 +522,7 @@ flex: 1 1 auto;
 		$("#bMinute").change(function(){
 			//$('.upcontent').removeClass("focus");
 			//$('#bMinute').addClass("focus");
+			document.cookie = 'minute='+$('#bMinute').val();
 			var v = $('#bpmInput').val() * $('#bMinute').val()
 			//$('#bMinute').val(0);
 			$('#bCount').val(v);
@@ -518,6 +531,7 @@ flex: 1 1 auto;
 		$("#bCount").change(function(){
 			//$('.upcontent').removeClass("focus");
 			//$('#bCount').addClass("focus");
+			document.cookie = 'count='+$('#bCount').val();
 			$('#bMinute').val(-1);
 			//$('#bCount').val(0);
 		});
