@@ -99,8 +99,23 @@ label {
 		float: right;
 	}
 	
-	.stop {
-		background-color: #ee2b2b;
+	.range-wrap {
+		display: flex;
+		
+		align-items: center;
+		padding: 1rem 0;
+	}
+	
+	.key {
+	    transition: all .07s ease;
+    color: #333;
+    border: 1px solid #ccc;
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+	cursor: pointer;
+    
+    font-size: 15px;
 	}
 	
 	#bpmInput {
@@ -233,10 +248,11 @@ flex: 1 1 auto;
 	<div class="setting">
 		<div class="sub-setting">
 		<h3>Speed</h3>
-		
-		<button id="keyMinus">&#8722;</button>
+		<div class="range-wrap">
+		<button id="keyMinus" class="key">&#8722;</button>
 		<input id="bpmInput" value="100" max="240" min="30" type="range">
-		<button id="keyPlus">+</button>
+		<button id="keyPlus" class="key">+</button>
+		</div>
 		<span class="textOut" id="bpmOut">100 BPM</span>
 		</div>
 		
@@ -296,23 +312,28 @@ flex: 1 1 auto;
 
 
 
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-      <script>
-	  function setRunning(isrun){
-		if(isrun)
-		{
-			$('#start').css('background-color', '#ee2b2b');
-			$('#start > i').removeClass("fa-play");
-			$('#start > i').addClass("fa-stop");
+    <script>
+		$(document).ready(function(){
+			
+        });
+	  
+	  
+		function setRunning(isrun){
+			if(isrun)
+			{
+				$('#start').css('background-color', '#ee2b2b');
+				$('#start > i').removeClass("fa-play");
+				$('#start > i').addClass("fa-stop");
+			}
+			else
+			{
+				$('#start').css('background-color', '#4CAF50');
+				$('#start > i').removeClass("fa-stop");
+				$('#start > i').addClass("fa-play");
+			}
 		}
-		else
-		{
-			$('#start').css('background-color', '#4CAF50');
-			$('#start > i').removeClass("fa-stop");
-			$('#start > i').addClass("fa-play");
-		}
-	  }
 	  
 		var running =false;
 		$("#start").click(function(){
