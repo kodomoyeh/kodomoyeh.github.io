@@ -13,9 +13,29 @@
 	
 	.upcontent {
 	  display: inline-block;
-	  width: 6em;
+	  border-radius: 4px;
+	  border-width: 0;
+	  width: 60px;
+      height: 34px;
 	  position: relative;
-	  top: -3em;
+	  top: -68px;
+	  left : -5px;
+	  font-size: inherit;
+		padding: 0.2em;
+		margin: 0.1em 0.2em;
+
+		box-sizing: content-box;
+		text-align:center;
+			background-color: #CCCCCC;
+    color: black;
+	}
+	
+
+	
+	.focus
+	{
+	background-color: #3978F2;
+    color: white;
 	}
 
 label {
@@ -196,7 +216,7 @@ flex: 1 1 auto;
 
 
 <div class="play" style="padding: 8px;">
-<button id="start">Start</button>
+<button id="start"><i class="fa-solid fa-play"></i></button>
 </div>
 
 <div class="controlpad">
@@ -221,15 +241,15 @@ flex: 1 1 auto;
 
 		<div class="sub-setting">
 		<h3>Run time</h3>
-		<div style="padding-top: 20px;flex-direction: row;">
+		<div style="padding-top: 48px;flex-direction: row;">
 	
 
-            <label id="limitMinute"> Loop <button id="keyPlus" class="upcontent" ><i class="fa-solid fa-infinity"></i></button>
+            <label id="labelInfinite"> Loop <button id="bInfinite" class="upcontent focus" ><i class="fa-solid fa-infinity"></i></button>
 			</label>
 			
-            <label id="limitMinute"> Minutes <input class="upcontent"  value="1" type="number"></label>
+            <label id="labelMinute"> Minutes <input id="bMinute" class="upcontent notfocus"  value="-1" max="10" min="-1" type="number"></label>
 		
-			<label id="limitCount"> Counts <input class="upcontent"  value="100" max="240" min="30" type="number"></label>
+			<label id="labelCount"> Counts <input id="bCount" class="upcontent notfocus"  value="-1" max="2400" min="-1" type="number"></label>
 			
  
 		
@@ -284,18 +304,21 @@ flex: 1 1 auto;
 				let pos = 0;
 				clearInterval(id);
 				id = setInterval(frame, 5);
+				var count = $('#bCount').val();
 				function frame() {
 				if (pos > 100) {
 					step *= -1;
 					pos+=step;
+					count--;
 				  //clearInterval(id);
 				} else if (pos < 0) {
 					step *= -1;
 					pos+=step;
+					count--;
 				  //clearInterval(id);
 				}
-				
-				if(running){
+			
+				if(running && count != 0){
 				  pos+=step; 
 				  if(harmonic)
 				  {
@@ -354,6 +377,40 @@ flex: 1 1 auto;
 			//console.log(v);
 			$('#animate').css('background-color', v);
 		});
+		
+		$("#labelInfinite").click(function(){
+			$('.upcontent').removeClass("focus");
+			$('#bInfinite').addClass("focus");
+			$('#bMinute').val(-1);
+			$('#bCount').val(-1);
+		});
+		
+		$("#labelMinute").click(function(){
+			$('.upcontent').removeClass("focus");
+			$('#bMinute').addClass("focus");
+		});
+		
+		$("#labelCount").click(function(){
+			$('.upcontent').removeClass("focus");
+			$('#bCount').addClass("focus");
+		});
+		
+		$("#bMinute").change(function(){
+			//$('.upcontent').removeClass("focus");
+			//$('#bMinute').addClass("focus");
+			var v = $('#bpmInput').val() * $('#bMinute').val()
+			//$('#bMinute').val(0);
+			$('#bCount').val(v);
+		});
+		
+		$("#bCount").change(function(){
+			//$('.upcontent').removeClass("focus");
+			//$('#bCount').addClass("focus");
+			$('#bMinute').val(-1);
+			//$('#bCount').val(0);
+		});
+		
+		
       </script>
 
 
