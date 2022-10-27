@@ -73,6 +73,10 @@ label {
    
 	}
 	
+	#bpmInput {
+		width:80%;
+	}
+	
 .switch {
   position: relative;
   display: inline-block;
@@ -135,7 +139,9 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-	
+	.limit {
+        max-width: 100px;
+    }
 	
     #dialog_log {
     overflow: auto;
@@ -153,8 +159,12 @@ flex: 1 1 auto;
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 	<meta property="og:image" content="https://kodomoyeh.github.io/emdr-ico.png" />
 	<link rel="icon" type="image/png" sizes="32x32" href="./emdr-ico.png">
-<link rel="icon" type="image/png" sizes="96x96" href="./emdr-ico.png">
-<link rel="icon" type="image/png" sizes="16x16" href="./emdr-ico.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="./emdr-ico.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="./emdr-ico.png">
+	
+	<link href="./fontawesome/css/fontawesome.css" rel="stylesheet">
+	<link href="./fontawesome/css/brands.css" rel="stylesheet">
+	<link href="./fontawesome/css/solid.css" rel="stylesheet">
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-2JZ6DCFTXK"></script>
 <script>
@@ -194,10 +204,10 @@ flex: 1 1 auto;
 		<div class="sub-setting">
 		<h3>Speed</h3>
 		
-		<button class="keyMinus">&#8722;</button>
+		<button id="keyMinus">&#8722;</button>
 		<input id="bpmInput" value="100" max="240" min="30" type="range">
-		<button class="keyPlus">+</button>
-		<span class="bpmOut" id="bpmOut">100 BPM</span>
+		<button id="keyPlus">+</button>
+		<span class="textOut" id="bpmOut">100 BPM</span>
 		</div>
 		
 		<div class="sub-setting">
@@ -206,15 +216,25 @@ flex: 1 1 auto;
 		  <input type="checkbox" id="harmonic">
 		  <span class="slider round"></span>
 		</label>
+		<span class="textOut" id="moveTypeOut">Static Speed</span>
 		</div>
 
 		<div class="sub-setting">
 		<h3>Run time</h3>
-		<div style="padding-top: 20px;">
+		<div style="padding-top: 20px;flex-direction: row;">
+	
+
+            <label id="limitMinute"> Loop <button id="keyPlus" class="upcontent" ><i class="fa-solid fa-infinity"></i></button>
+			</label>
+			
+            <label id="limitMinute"> Minutes <input class="upcontent"  value="1" type="number"></label>
 		
-		<label> Loop <button id="infinite" class="upcontent">圈圈</button></label>
-		<label> Minutes <input class="upcontent" id="bpmInput" value="1" type="number"></label>
-		<label> Counts <input class="upcontent" id="bpmInput" value="100" max="244" min="30" type="number"></label>
+			<label id="limitCount"> Counts <input class="upcontent"  value="100" max="240" min="30" type="number"></label>
+			
+ 
+		
+		
+
 		</div>
 		</div>
 
@@ -223,6 +243,15 @@ flex: 1 1 auto;
 	</div>
 	
 	<div class="shape-color">
+		<div class="sub-setting">
+		<h3>Color</h3>
+		<div style="padding-top: 20px;">
+		
+			<input type="color" id="mainColor" name="head"
+				   value="#25a2ff">
+			<label for="head"></label>
+		</div>
+		</div>
 
 
 	</div>
@@ -297,6 +326,33 @@ flex: 1 1 auto;
 			var v = document.getElementById("bpmInput").value;
 			//console.log(v);
 			document.getElementById("bpmOut").textContent = v +" BPM";
+		});
+		$("#harmonic").change(function(){
+			var v = document.getElementById("harmonic").checked;
+			console.log(v);
+			if(v)
+				document.getElementById("moveTypeOut").textContent = "Simple Harmonic Motion";
+			else
+				document.getElementById("moveTypeOut").textContent = "Static Speed";
+		});
+		$("#keyMinus").click(function(){
+			var v = document.getElementById("bpmInput").value;
+			v--;
+			console.log(v);
+			document.getElementById("bpmInput").value = v;
+			document.getElementById("bpmOut").textContent = v +" BPM";
+		});
+		$("#keyPlus").click(function(){
+			var v = document.getElementById("bpmInput").value;
+			v++;
+			console.log(v);
+			document.getElementById("bpmInput").value = v;
+			document.getElementById("bpmOut").textContent = v +" BPM";
+		});
+		$("#mainColor").change(function(){
+			var v = document.getElementById("mainColor").value;
+			//console.log(v);
+			$('#animate').css('background-color', v);
 		});
       </script>
 
