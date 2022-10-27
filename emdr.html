@@ -319,8 +319,19 @@ flex: 1 1 auto;
 			//$.cookie('subscripted_24', true, { expires: 2147483647 });
 			console.log('ready' + document.cookie);
 			document.cookie = 'user=Kodomo; path=/; expires=Tue, 19 Jan 2038 03:14:07 GMT';
-			var  v = getCookie('user')
-			console.log('user = ' + v);
+			var  v = getCookie('user1');
+			if(v)
+				console.log('user1 = ' + v);
+			else
+					console.log('user1 no value ');
+			
+			
+			
+			var harmo = getCookie('harmonic');
+			if(harmo && harmo >0 )
+			{
+				$('#harmonic').prop('checked', true);
+			}
 			
         });
 	  
