@@ -11,7 +11,7 @@
 		background: linear-gradient(0deg, rgba(251,251,251,1) 0%, rgba(153,190,194,1) 100%);
 	}
 	
-	.upcontent {
+	.upcontent , .colorButton{
 	  display: inline-block;
 	  border-radius: 4px;
 	  border-width: 0;
@@ -28,6 +28,13 @@
 		text-align:center;
 			background-color: #CCCCCC;
     color: black;
+	}
+	
+	.colorButton{
+
+
+	  top: 0px;
+
 	}
 	
 
@@ -265,11 +272,11 @@ flex: 1 1 auto;
 	<div class="shape-color">
 		<div class="sub-setting">
 		<h3>Color</h3>
-		<div style="padding-top: 20px;">
+		<div >
 		
-			<input type="color" id="mainColor" name="head"
+			<input type="color" id="mainColor" name="head" class="colorButton" 
 				   value="#25a2ff">
-			<label for="head"></label>
+			<span for="head">Click to change color</span>
 		</div>
 		</div>
 
