@@ -425,6 +425,11 @@ input:checked + .slider:before {
 			if(harmo && harmo >0 )
 			{
 				$('#harmonic').prop('checked', true);
+				$('#moveTypeOut').text("Simple Harmonic Motion");
+			}
+			else
+			{
+				$('#moveTypeOut').text("Static Speed");
 			}
 			var bpm = getCookie('bpm');
 			if(bpm && bpm >=30 && bpm<=240)
@@ -615,7 +620,7 @@ input:checked + .slider:before {
 			var v = document.getElementById("bpmInput").value;
 			//console.log(v);
 			document.cookie = 'bpm='+v+'; max-age=604800';
-			document.getElementById("bpmOut").textContent = v +" BPM";
+			$('#bpmOut').text(v + " BPM");
 		});
 		$("#harmonic").change(function(){
 			var v = document.getElementById("harmonic").checked;
@@ -623,12 +628,12 @@ input:checked + .slider:before {
 
 			if(v)
 			{
-				document.getElementById("moveTypeOut").textContent = "Simple Harmonic Motion";
+				$('#moveTypeOut').text("Simple Harmonic Motion");
 				document.cookie = 'harmonic=1'+'; max-age=604800';
 			}
 			else
 			{
-				document.getElementById("moveTypeOut").textContent = "Static Speed";
+				$('#moveTypeOut').text("Static Speed");
 				document.cookie = 'harmonic=0'+'; max-age=604800';
 			}
 
@@ -639,7 +644,7 @@ input:checked + .slider:before {
 			console.log(v);
 			document.getElementById("bpmInput").value = v;
 			document.cookie = 'bpm='+v+'; max-age=604800';
-			document.getElementById("bpmOut").textContent = v +" BPM";
+			$('#bpmOut').text(v + " BPM");
 		});
 		$("#keyPlus").click(function(){
 			var v = document.getElementById("bpmInput").value;
@@ -647,7 +652,7 @@ input:checked + .slider:before {
 			console.log(v);
 			document.getElementById("bpmInput").value = v;
 			document.cookie = 'bpm='+v+'; max-age=604800';
-			document.getElementById("bpmOut").textContent = v +" BPM";
+			$('#bpmOut').text(v + " BPM");
 		});
 		$("#mainColor").change(function(){
 			var v = document.getElementById("mainColor").value;
