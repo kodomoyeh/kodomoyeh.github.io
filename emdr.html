@@ -226,6 +226,23 @@ input:checked + .slider:before {
   border-bottom: none;
 }
 
+
+/*This is for dot1 and dot2*/
+.dotFadeInOut {
+    opacity: 1;
+    animation: fade 0.2s linear;
+}
+
+
+@keyframes fade {
+  0%,100% { opacity: 0 }
+  50% { opacity: 1 }
+}
+
+.dots {
+	opacity: 0
+}
+
 </style>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 	<meta property="og:image" content="https://kodomoyeh.github.io/emdr-ico.png" />
@@ -260,10 +277,10 @@ input:checked + .slider:before {
 	<div class="subpad" id="dot" style="
     justify-content: space-between;
 ">
-		
-		<div class="square" id="dot1"></div>
-		<div class="square" id="dot2"></div>
-	
+
+		<div class="square dots" id="dot1"></div>
+		<div class="square dots" id="dot2"></div>
+
 	</div>
 	<div class="subpad" id="slide">
 		<div class="boundary">
@@ -348,6 +365,7 @@ input:checked + .slider:before {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	
     <script>
+		var tab = 0;
 		function getCookie(name) {
 		  const value = `; ${document.cookie}`;
 		  const parts = value.split(`; ${name}=`);
@@ -356,9 +374,15 @@ input:checked + .slider:before {
 		
 		function openTab(evt, tabName) {
 			if(tabName=='slide')
+			{
 				document.cookie = 'tab=0';
+				tab = 0;
+			}
 			if(tabName=='dot')
+			{
 				document.cookie = 'tab=1';
+				tab = 1;
+			}
 		  // Declare all variables
 		  var i, tabcontent, tablinks;
 
@@ -467,7 +491,7 @@ input:checked + .slider:before {
         });
 	  
 	  
-		function setRunning(isrun){
+		function setRunningButton(isrun){
 			if(isrun)
 			{
 				$('#start').css('background-color', '#ee2b2b');
@@ -487,61 +511,97 @@ input:checked + .slider:before {
 			if(!running)
 			{
 				running = true;
-				setRunning(running);
+				setRunningButton(running);
 				let id = null;
 				var bpm = document.getElementById("bpmInput").value;
-				var harmonic = document.getElementById("harmonic").checked;
-				console.log(harmonic)
-				var step = bpm*5/600.0;
-				const elem = document.getElementById("animate");
-				elem.style.left = "0%"; 
-				let pos = 0;
-				clearInterval(id);
-				id = setInterval(frame, 5);
 				var count = $('#bCount').val();
-				function frame() {
-					if (pos > 100) {
-						step *= -1;
-						pos+=step;
-						count--;
-					  //clearInterval(id);
-					} else if (pos < 0) {
-						step *= -1;
-						pos+=step;
-						count--;
-					  //clearInterval(id);
-					}
-				
-					if(running && count != 0){
-					  pos+=step;
-					  if(harmonic)
-					  {
-						  var hpos=-50.0*Math.cos(pos/100.0*Math.PI)+50; 
-						  
-						  elem.style.left = hpos + "%"; 
-					  }
-					  else
-					  {
-							elem.style.left = pos + "%"; 
-					  }
-					  
-					}
-					else
-					{
-						elem.style.left = "50%";
-						clearInterval(id);
-						if(running)
+				if(tab==0)
+				{
+					var harmonic = document.getElementById("harmonic").checked;
+					console.log(harmonic)
+					var step = bpm*5/600.0;
+					const elem = document.getElementById("animate");
+					elem.style.left = "0%"; 
+					let pos = 0;
+					clearInterval(id);
+					id = setInterval(frame, 5);
+
+					function frame() {
+						if (pos > 100) {
+							step *= -1;
+							pos+=step;
+							count--;
+						  //clearInterval(id);
+						} else if (pos < 0) {
+							step *= -1;
+							pos+=step;
+							count--;
+						  //clearInterval(id);
+						}
+
+						if(running && count != 0){
+						  pos+=step;
+						  if(harmonic)
+						  {
+							  var hpos=-50.0*Math.cos(pos/100.0*Math.PI)+50;
+							  elem.style.left = hpos + "%";
+						  }
+						  else
+						  {
+								elem.style.left = pos + "%";
+						  }
+
+						}
+						else
 						{
-							running = false;
-							setRunning(running);
+							elem.style.left = "50%";
+							clearInterval(id);
+							if(running)
+							{
+								running = false;
+								setRunningButton(running);
+							}
 						}
 					}
 				}
+				else if(tab == 1)
+				{
+					var step = 60000.0/bpm;
+					id = setInterval(frame, step);
+					var pos = 0;
+					function frame() {
+
+						if(running && count != 0){
+							if(pos%2==0)
+							{
+								$('#dot1').addClass("dotFadeInOut");
+								$('#dot2').removeClass("dotFadeInOut");
+							}
+							else
+							{
+								$('#dot2').addClass("dotFadeInOut");
+								$('#dot1').removeClass("dotFadeInOut");
+							}
+							pos++;
+						}
+						else
+						{
+							clearInterval(id);
+							if(running)
+							{
+								running = false;
+								setRunningButton(running);
+							}
+						}
+						count--;
+					}
+				}
+
 			}
 			else
 			{
 				running = false;
-				setRunning(running);
+				setRunningButton(running);
 			}
 			//alert("The text has been changed.");
 		});
