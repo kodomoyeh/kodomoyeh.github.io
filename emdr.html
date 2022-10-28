@@ -444,6 +444,7 @@ input:checked + .slider:before {
 				{
 					if(minute)
 					{
+						$("#labelMinute").click();
 						$("#bMinute").val(minute);
 						var v = $('#bpmInput').val() * $('#bMinute').val()
 						$('#bCount').val(v);
@@ -453,6 +454,7 @@ input:checked + .slider:before {
 				{
 					if(count)
 					{
+						$("#labelCount").click();
 						$("#bCount").val(count);
 						$('#bMinute').val(-1);
 					}
