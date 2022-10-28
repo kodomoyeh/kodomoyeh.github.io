@@ -63,6 +63,11 @@ label {
 		padding: 8px 8px 8px 8px;
 	}
 	
+	.boundary {
+		width: 100%;
+		padding: 0px 50px 0px 0px;
+	}
+	
 	.play {
 		overflow:auto
 	}
@@ -253,14 +258,18 @@ input:checked + .slider:before {
 
 <div class="pad">
 	<div class="subpad" id="dot">
+		<div class="boundary">
 
+		</div>
 	</div>
 	<div class="subpad" id="slide">
+		<div class="boundary">
 		<div class="square" id="animate"></div>
+		</div>
 	</div>
 	<div class="tab">
 	  <button class="tablinks" onclick="openTab(event, 'slide')" id="defaultOpen"><i class="fa-solid fa-arrows-left-right"></i></button>
-	  <button class="tablinks" onclick="openTab(event, 'dot')" id="dot"><i class="fa-regular fa-circle-dot"></i></button>
+	  <button class="tablinks" onclick="openTab(event, 'dot')" id="dotTab"><i class="fa-regular fa-circle-dot"></i></button>
 	</div>
 </div>
 
@@ -442,7 +451,7 @@ input:checked + .slider:before {
 				}
 				if(tab==1)
 				{
-					$("#dot").click();
+					$("#dotTab").click();
 				}
 				
 				//$('#animate').css('background-color', color);
