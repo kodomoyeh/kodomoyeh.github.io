@@ -72,12 +72,7 @@ label {
 		overflow:auto
 	}
 	
-	.subpad {
-		align-items: center;
-		display: flex;
-		height:200px;
-		padding: 20px;
-	}
+
 	
 	.square {
 	  height: 50px;
@@ -206,6 +201,7 @@ input:checked + .slider:before {
   cursor: pointer;
   padding: 14px 16px;
   transition: 0.3s;
+  min-width: 64px;
 }
 
 /* Change background color of buttons on hover */
@@ -220,10 +216,14 @@ input:checked + .slider:before {
 
 /* Style the tab content */
 .subpad {
-  display: none;
-  padding: 6px 12px;
-  border: 1px solid #ccc;
-  border-bottom: none;
+	display: none;
+	padding: 6px 12px;
+	border: 1px solid #ccc;
+	border-bottom: none;
+
+	align-items: center;
+	height:200px;
+
 }
 
 
@@ -467,7 +467,7 @@ input:checked + .slider:before {
 			{
 				$('#mainColor').val(color);
 				console.log(color);
-				$('#animate').css('background-color', color);
+				$('.square').css('background-color', color);
 			}
 			
 			var tab = getCookie('tab');
