@@ -376,12 +376,12 @@ input:checked + .slider:before {
 		function openTab(evt, tabName) {
 			if(tabName=='slide')
 			{
-				document.cookie = 'tab=0';
+				document.cookie = 'tab=0'+'; max-age=604800';
 				tab = 0;
 			}
 			if(tabName=='dot')
 			{
-				document.cookie = 'tab=1';
+				document.cookie = 'tab=1'+'; max-age=604800';
 				tab = 1;
 			}
 		  // Declare all variables
@@ -614,7 +614,7 @@ input:checked + .slider:before {
 		$("#bpmInput").change(function(){
 			var v = document.getElementById("bpmInput").value;
 			//console.log(v);
-			document.cookie = 'bpm='+v;
+			document.cookie = 'bpm='+v+'; max-age=604800';
 			document.getElementById("bpmOut").textContent = v +" BPM";
 		});
 		$("#harmonic").change(function(){
@@ -624,12 +624,12 @@ input:checked + .slider:before {
 			if(v)
 			{
 				document.getElementById("moveTypeOut").textContent = "Simple Harmonic Motion";
-				document.cookie = 'harmonic=1';
+				document.cookie = 'harmonic=1'+'; max-age=604800';
 			}
 			else
 			{
 				document.getElementById("moveTypeOut").textContent = "Static Speed";
-				document.cookie = 'harmonic=0';
+				document.cookie = 'harmonic=0'+'; max-age=604800';
 			}
 
 		});
@@ -638,7 +638,7 @@ input:checked + .slider:before {
 			v--;
 			console.log(v);
 			document.getElementById("bpmInput").value = v;
-			document.cookie = 'bpm='+v;
+			document.cookie = 'bpm='+v+'; max-age=604800';
 			document.getElementById("bpmOut").textContent = v +" BPM";
 		});
 		$("#keyPlus").click(function(){
@@ -646,18 +646,18 @@ input:checked + .slider:before {
 			v++;
 			console.log(v);
 			document.getElementById("bpmInput").value = v;
-			document.cookie = 'bpm='+v;
+			document.cookie = 'bpm='+v+'; max-age=604800';
 			document.getElementById("bpmOut").textContent = v +" BPM";
 		});
 		$("#mainColor").change(function(){
 			var v = document.getElementById("mainColor").value;
-			document.cookie = 'color='+v;
+			document.cookie = 'color='+v+'; max-age=604800';
 			console.log(v);
 			$('.square').css('background-color', v);
 		});
 		
 		$("#labelInfinite").click(function(){
-			document.cookie = 'type=0';
+			document.cookie = 'type=0'+'; max-age=604800';
 			$('.upcontent').removeClass("focus");
 			$('#bInfinite').addClass("focus");
 			$('#bMinute').val(-1);
@@ -665,13 +665,15 @@ input:checked + .slider:before {
 		});
 		
 		$("#labelMinute").click(function(){
-			document.cookie = 'type=1';
+			document.cookie = 'type=1'+'; max-age=604800';
+			document.cookie = 'minute='+$('#bMinute').val()+'; max-age=604800';
 			$('.upcontent').removeClass("focus");
 			$('#bMinute').addClass("focus");
 		});
 		
 		$("#labelCount").click(function(){
-			document.cookie = 'type=2';
+			document.cookie = 'type=2'+'; max-age=604800';
+			document.cookie = 'count='+$('#bCount').val()+'; max-age=604800';
 			$('.upcontent').removeClass("focus");
 			$('#bCount').addClass("focus");
 		});
@@ -679,7 +681,7 @@ input:checked + .slider:before {
 		$("#bMinute").change(function(){
 			//$('.upcontent').removeClass("focus");
 			//$('#bMinute').addClass("focus");
-			document.cookie = 'minute='+$('#bMinute').val();
+			document.cookie = 'minute='+$('#bMinute').val()+'; max-age=604800';
 			var v = $('#bpmInput').val() * $('#bMinute').val()
 			//$('#bMinute').val(0);
 			$('#bCount').val(v);
@@ -688,7 +690,7 @@ input:checked + .slider:before {
 		$("#bCount").change(function(){
 			//$('.upcontent').removeClass("focus");
 			//$('#bCount').addClass("focus");
-			document.cookie = 'count='+$('#bCount').val();
+			document.cookie = 'count='+$('#bCount').val()+'; max-age=604800';
 			$('#bMinute').val(-1);
 			//$('#bCount').val(0);
 		});
