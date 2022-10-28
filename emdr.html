@@ -257,10 +257,13 @@ input:checked + .slider:before {
 <div class="base">
 
 <div class="pad">
-	<div class="subpad" id="dot">
-		<div class="boundary">
-
-		</div>
+	<div class="subpad" id="dot" style="
+    justify-content: space-between;
+">
+		
+		<div class="square" id="dot1"></div>
+		<div class="square" id="dot2"></div>
+	
 	</div>
 	<div class="subpad" id="slide">
 		<div class="boundary">
@@ -585,7 +588,7 @@ input:checked + .slider:before {
 			var v = document.getElementById("mainColor").value;
 			document.cookie = 'color='+v;
 			console.log(v);
-			$('#animate').css('background-color', v);
+			$('.square').css('background-color', v);
 		});
 		
 		$("#labelInfinite").click(function(){
