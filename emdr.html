@@ -566,11 +566,13 @@ input:checked + .slider:before {
 				}
 				else if(tab == 1)
 				{
+					$('#dot1').removeClass("dotFadeInOut");
+					$('#dot2').removeClass("dotFadeInOut");
 					var step = 60000.0/bpm;
 					id = setInterval(frame, step);
 					var pos = 0;
 					function frame() {
-
+						//console.log("pos="+pos);
 						if(running && count != 0){
 							if(pos%2==0)
 							{
