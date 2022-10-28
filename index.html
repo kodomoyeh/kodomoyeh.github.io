@@ -1,0 +1,967 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="google-site-verification" content="EuGaf0qNgRtMvwny8HrokMmm5a_7plge-RA0OWIyvTU" />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>A Puzzle A Day</title>
+<style>
+	.dialog {
+      width:350px;
+	  height:250px;
+	  position: absolute;
+      z-index: 9;
+
+
+    }
+	
+	.dialog-b {
+	  width:100%;
+	  height:100%;
+      background-color: #ceeaec;
+      border: 4px solid #6263ad;
+	  display: flex;
+      flex-direction: column;
+	}
+	
+	
+	
+    #dialog_log {
+    overflow: auto;
+flex: 1 1 auto;
+        padding: 21px;
+    }
+
+    #dialog_log > p {
+        padding: 0px;
+        margin: 0px;
+        font-size: 14px;
+    }
+    .anchor {
+      width:10px;
+      height:10px;
+      padding: 10px;
+      cursor: move;
+      z-index: 10;
+      background-color: #2196F3;
+      color: #fff;
+      border-radius: 100%;
+    }
+    .anchor_tail {
+      position: absolute;
+
+		padding: 10px;
+		cursor: nwse-resize;
+		z-index: 10;
+		background-color: #00000000;
+		right: -10px;
+		bottom: -11px;
+    }
+</style>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+	<meta property="og:image" content="https://kodomoyeh.github.io/apad.png" />
+	<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="./favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-2JZ6DCFTXK"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-2JZ6DCFTXK');
+</script>
+  </head>
+  <body>
+
+	<div id="route_1" class="dialog">
+	<div class="dialog-b">
+    <div id="route_1header" class="anchor" ></div>
+    <div id="dialog_log">
+        <p>Kodomo</p>
+        <p>say</p>
+        <p>hi !</p>
+    </div>
+	
+	</div>
+	<div id="route_1tailer" class="anchor_tail" ></div>
+	</div>
+
+    <div class="wrapper">
+      <header>
+        <h1 class="header">A Puzzle A Day</h1>
+		<img src="./apad.png">
+        <p class="header">You could try it manually on <a href="https://mathigon.org/polypad/GT81i2cAdFhUDQ">here</a></p>
+
+        <ul>
+          <li>I used csp.js from <a class="buttons github" href="https://github.com/PrajitR/cspjs">PrajitR's GitHub</a></li>
+        </ul>
+
+      </header>
+      <section>
+      <button id="apad-button">Solve A Puzzle A Day</button>
+	  <p>Want to solve another day ? try to parameter like ?date=mmdd ex: <a href="https://kodomoyeh.github.io/?date=0303">https://kodomoyeh.github.io/?date=0303</a></p>
+      <br/>
+<div id="drawbase">	<svg version="1.1" id="layer" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="387px" height="387px" viewBox="0 0 387 387" enable-background="new 0 0 387 387" xml:space="preserve">
+<g id="table">
+	<rect x="43" y="43" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="86" y="43" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="129" y="43" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="172" y="43" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="215" y="43" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="258" y="43" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="43" y="86" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="86" y="86" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="129" y="86" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="172" y="86" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="215" y="86" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="258" y="86" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="43" y="129" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="86" y="129" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="129" y="129" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="172" y="129" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="215" y="129" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="258" y="129" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="301" y="129" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="43" y="172" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="86" y="172" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="129" y="172" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="172" y="172" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="215" y="172" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="258" y="172" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="301" y="172" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="43" y="215" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="86" y="215" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="129" y="215" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="172" y="215" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="215" y="215" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="258" y="215" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="301" y="215" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="43" y="258" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="86" y="258" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="129" y="258" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="172" y="258" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="215" y="258" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="258" y="258" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="301" y="258" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="43" y="301" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="86" y="301" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+	<rect x="129" y="301" fill="#FFFFFF" stroke="#000000" stroke-width="2" stroke-miterlimit="10" width="43" height="43"/>
+</g>
+<g id="text">
+		<text transform="matrix(1 0 0 1 51.3115 70.6216)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">Jan</text>
+		<text transform="matrix(1 0 0 1 92.5986 70.6206)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">Feb</text>
+		<text transform="matrix(1 0 0 1 134.3457 70.6216)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">Mar</text>
+		<text transform="matrix(1 0 0 1 178.7036 70.6216)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">Apr</text>
+		<text transform="matrix(1 0 0 1 219.146 70.6216)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">May</text>
+		<text transform="matrix(1 0 0 1 265.9038 70.6211)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">Jun</text>
+		<text transform="matrix(1 0 0 1 54.1064 115.4419)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">Jul</text>
+		<text transform="matrix(1 0 0 1 90.7041 115.4419)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">Aug</text>
+		<text transform="matrix(1 0 0 1 135.2729 115.4429)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">Sep</text>
+		<text transform="matrix(1 0 0 1 178.875 115.4419)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">Oct</text>
+		<text transform="matrix(1 0 0 1 219.708 115.4419)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">Nov</text>
+		<text transform="matrix(1 0 0 1 263.7632 115.4429)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">Dec</text>
+		<text transform="matrix(1 0 0 1 61.0146 156.7598)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">1</text>
+		<text transform="matrix(1 0 0 1 102.4463 156.7598)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">2</text>
+		<text transform="matrix(1 0 0 1 145.4463 156.7607)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">3</text>
+		<text transform="matrix(1 0 0 1 188.2881 156.7598)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">4</text>
+		<text transform="matrix(1 0 0 1 231.4458 156.7598)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">5</text>
+		<text transform="matrix(1 0 0 1 274.5166 156.7607)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">6</text>
+		<text transform="matrix(1 0 0 1 317.6436 156.7603)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">7</text>
+		<text transform="matrix(1 0 0 1 59.4463 201.0635)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">8</text>
+		<text transform="matrix(1 0 0 1 102.4111 201.0635)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">9</text>
+		<text transform="matrix(1 0 0 1 141.9263 201.0645)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">10</text>
+		<text transform="matrix(1 0 0 1 186.46 201.0635)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">11</text>
+		<text transform="matrix(1 0 0 1 227.9258 201.0635)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">12</text>
+		<text transform="matrix(1 0 0 1 270.9966 201.0645)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">13</text>
+		<text transform="matrix(1 0 0 1 313.8037 201.064)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">14</text>
+		<text transform="matrix(1 0 0 1 55.9268 244.7344)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">15</text>
+		<text transform="matrix(1 0 0 1 98.8916 244.7344)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">16</text>
+		<text transform="matrix(1 0 0 1 142.0537 244.7354)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">17</text>
+		<text transform="matrix(1 0 0 1 184.8911 244.7344)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">18</text>
+		<text transform="matrix(1 0 0 1 227.8906 244.7344)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">19</text>
+		<text transform="matrix(1 0 0 1 269.4277 244.7354)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">20</text>
+		<text transform="matrix(1 0 0 1 313.9268 244.7349)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">21</text>
+		<text transform="matrix(1 0 0 1 54.3574 285.2402)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">22</text>
+		<text transform="matrix(1 0 0 1 97.3223 285.2402)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">23</text>
+		<text transform="matrix(1 0 0 1 140.1641 285.2412)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">24</text>
+		<text transform="matrix(1 0 0 1 183.3223 285.2402)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">25</text>
+		<text transform="matrix(1 0 0 1 226.3218 285.2402)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">26</text>
+		<text transform="matrix(1 0 0 1 269.5552 285.2412)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">27</text>
+		<text transform="matrix(1 0 0 1 312.3574 285.2407)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">28</text>
+		<text transform="matrix(1 0 0 1 54.4453 329.5439)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">29</text>
+		<text transform="matrix(1 0 0 1 97.4102 329.5439)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">30</text>
+		<text transform="matrix(1 0 0 1 141.9438 329.5449)" display="inline" fill="#808080" font-family="'MicrosoftJhengHeiLight'" font-size="18">31</text>
+</g>
+
+		<polygon id="x31_8" class="svgblock" fill="#FD8C00" points="43,0 43,129 0,129 0,172 86,172 86,0 		"/>
+		<polygon id="x31_7" class="svgblock" fill="#FD8C00" points="0,0 0,43 43,43 43,172 86,172 86,0 		"/>
+		<polygon id="x31_6" class="svgblock" fill="#FD8C00" points="0,0 0,172 43,172 43,43 86,43 86,0 		"/>
+		<polygon id="x31_5" class="svgblock" fill="#FD8C00" points="43,129 43,0 0,0 0,172 86,172 86,129 		"/>
+		<polygon id="x31_4" class="svgblock" fill="#FD8C00" points="0,0 0,43 129,43 129,86 172,86 172,0 		"/>
+		<polygon id="x31_3" class="svgblock" fill="#FD8C00" points="0,0 0,86 43,86 43,43 172,43 172,0 		"/>
+		<polygon id="x31_2" class="svgblock" fill="#FD8C00" points="43,43 43,0 0,0 0,86 172,86 172,43 		"/>
+		<polygon id="x31_1" class="svgblock" fill="#FD8C00" points="129,0 129,43 0,43 0,86 172,86 172,0 		"/>
+
+<rect id="x32_2" class="svgblock" fill="#0F82F2" width="86" height="129"/>
+<rect id="x32_1" class="svgblock" fill="#0F82F2" width="129" height="86"/>
+
+<polygon id="x33_8" class="svgblock" fill="#6D3BBF" points="43,172 43,129 86,129 86,0 43,0 43,86 0,86 0,129 0,172 "/>
+<polygon id="x33_7" class="svgblock" fill="#6D3BBF" points="43,172 43,129 0,129 0,0 43,0 43,86 86,86 86,129 86,172 "/>
+<polygon id="x33_6" class="svgblock" fill="#6D3BBF" points="43,0 43,43 0,43 0,172 43,172 43,86 86,86 86,43 86,0 "/>
+<polygon id="x33_5" class="svgblock" fill="#6D3BBF" points="43,0 43,43 86,43 86,172 43,172 43,86 0,86 0,43 0,0 "/>
+<polygon id="x33_4" class="svgblock" fill="#6D3BBF" points="172,43 129,43 129,0 0,0 0,43 86,43 86,86 129,86 172,86 "/>
+<polygon id="x33_3" class="svgblock" fill="#6D3BBF" points="172,43 129,43 129,86 0,86 0,43 86,43 86,0 129,0 172,0 "/>
+<polygon id="x33_2" class="svgblock" fill="#6D3BBF" points="0,43 43,43 43,0 172,0 172,43 86,43 86,86 43,86 0,86 "/>
+<polygon id="x33_1" class="svgblock" fill="#6D3BBF" points="0,43 43,43 43,86 172,86 172,43 86,43 86,0 43,0 0,0 "/>
+
+<polygon id="x34_4" class="svgblock" fill="#22AB24" points="86,0 86,86 129,86 129,129 43,129 43,43 0,43 0,0 "/>
+<polygon id="x34_3" class="svgblock" fill="#22AB24" points="43,0 43,86 0,86 0,129 86,129 86,43 129,43 129,0 "/>
+<polygon id="x34_2" class="svgblock" fill="#22AB24" points="0,86 86,86 86,129 129,129 129,43 43,43 43,0 0,0 "/>
+<polygon id="x34_1" class="svgblock" fill="#22AB24" points="129,86 43,86 43,129 0,129 0,43 86,43 86,0 129,0 "/>
+
+<polygon id="x35_4" class="svgblock" fill="#BFC212" points="86,0 86,86 0,86 0,129 129,129 129,0 "/>
+<polygon id="x35_3" class="svgblock" fill="#BFC212" points="43,0 43,86 129,86 129,129 0,129 0,0 "/>
+<polygon id="x35_2" class="svgblock" fill="#BFC212" points="43,129 43,43 129,43 129,0 0,0 0,129 "/>
+<polygon id="x35_1" class="svgblock" fill="#BFC212" points="86,129 86,43 0,43 0,0 129,0 129,129 "/>
+
+<polygon id="x36_8" class="svgblock" fill="#CD0E66" points="43,172 43,129 0,129 0,86 43,86 43,0 86,0 86,172 "/>
+<polygon id="x36_7" class="svgblock" fill="#CD0E66" points="43,0 43,43 0,43 0,86 43,86 43,172 86,172 86,0 "/>
+<polygon id="x36_6" class="svgblock" fill="#CD0E66" points="43,172 43,129 86,129 86,86 43,86 43,0 0,0 0,172 "/>
+<polygon id="x36_5" class="svgblock" fill="#CD0E66" points="43,0 43,43 86,43 86,86 43,86 43,172 0,172 0,0 "/>
+<polygon id="x36_4" class="svgblock" fill="#CD0E66" points="0,43 43,43 43,0 86,0 86,43 172,43 172,86 0,86 "/>
+<polygon id="x36_3" class="svgblock" fill="#CD0E66" points="172,43 129,43 129,0 86,0 86,43 0,43 0,86 172,86 "/>
+<polygon id="x36_2" class="svgblock" fill="#CD0E66" points="172,43 129,43 129,86 86,86 86,43 0,43 0,0 172,0 "/>
+<polygon id="x36_1" class="svgblock" fill="#CD0E66" points="0,43 43,43 43,86 86,86 86,43 172,43 172,0 0,0 "/>
+
+<polygon id="x37_8" class="svgblock" fill="#E687B3" points="0,0 86,0 86,86 43,86 43,129 0,129 "/>
+<polygon id="x37_7" class="svgblock" fill="#E687B3" points="86,0 0,0 0,86 43,86 43,129 86,129 "/>
+<polygon id="x37_6" class="svgblock" fill="#E687B3" points="86,129 0,129 0,43 43,43 43,0 86,0 "/>
+<polygon id="x37_5" class="svgblock" fill="#E687B3" points="0,129 86,129 86,43 43,43 43,0 0,0 "/>
+<polygon id="x37_4" class="svgblock" fill="#E687B3" points="0,0 0,86 86,86 86,43 129,43 129,0 "/>
+<polygon id="x37_3" class="svgblock" fill="#E687B3" points="129,0 129,86 43,86 43,43 0,43 0,0 "/>
+<polygon id="x37_2" class="svgblock" fill="#E687B3" points="129,86 129,0 43,0 43,43 0,43 0,86 "/>
+<polygon id="x37_1" class="svgblock" fill="#E687B3" points="0,86 0,0 86,0 86,43 129,43 129,86 "/>
+
+<polygon id="x38_1" class="svgblock" fill="#777777" points="86,0 86,43 43,43 43,0 0,0 0,86 129,86 129,0 "/>
+<polygon id="x38_2" class="svgblock" fill="#777777" points="86,86 86,43 43,43 43,86 0,86 0,0 129,0 129,86 "/>
+<polygon id="x38_3" class="svgblock" fill="#777777" points="0,43 43,43 43,86 0,86 0,129 86,129 86,0 0,0 "/>
+<polygon id="x38_4" class="svgblock" fill="#777777" points="86,43 43,43 43,86 86,86 86,129 0,129 0,0 86,0 "/>
+</svg>  
+
+  
+</div>
+      
+      <span id="apad" style="float: left; font-family: Consolas, monospace;"></span>
+
+      <br/>
+    
+      <script src="csp.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+      <script>
+	  function dragElement(elmnt) {
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  var top_pos = 0, left_pos = 0;
+  var pos5 = 0, pos6 = 0, pos7 = 0, pos8 = 0;
+  var div_h = 0, div_w = 0;
+  var target_element;
+  if (document.getElementById(elmnt.id + "header")) {
+    // if present, the header is where you move the DIV from:
+    document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+  } else {
+    // otherwise, move the DIV from anywhere inside the DIV:
+    elmnt.onmousedown = dragMouseDown;
+  }
+  
+   if (document.getElementById(elmnt.id + "tailer")) {
+    // if present, the header is where you move the DIV from:
+	document.getElementById(elmnt.id + "tailer").onmousedown = resizeMouseDown;
+  } else {
+    // otherwise, move the DIV from anywhere inside the DIV:
+	elmnt.onmousedown = resizeMouseDown;
+  }
+
+  function dragMouseDown(e) {
+	  target_element = elmnt;
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+  
+  function resizeMouseDown(e) {
+	  target_element = elmnt;
+	  console.log(elmnt.offsetWidth+" , "+elmnt.offsetHeight)
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos7 = e.clientX;
+    pos8 = e.clientY;
+    document.onmouseup = closeResizeElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementResize;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    // set the element's new position:
+	  top_pos = (elmnt.offsetTop - pos2) + "px";
+	  left_pos = (elmnt.offsetLeft - pos1) + "px"
+    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+  }
+  
+  function elementResize(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos5 = pos7 - e.clientX;
+    pos6 = pos8 - e.clientY;
+    pos7 = e.clientX;
+    pos8 = e.clientY;
+	
+    // set the element's new position:
+      div_w = (elmnt.offsetWidth  - pos5) + "px"
+	  div_h = (elmnt.offsetHeight  - pos6) + "px";
+    elmnt.style.width = (elmnt.offsetWidth - pos5 ) + "px";
+    elmnt.style.height = (elmnt.offsetHeight - pos6) + "px";
+
+	console.log(pos5+","+pos6+" ; "+pos7+","+pos8);
+	console.log("xxxxxxxx"+elmnt.offsetWidth+","+elmnt.offsetHeight);
+	//console.log("---->"+div_h+","+div_w);
+  }
+
+  function closeDragElement() {
+    // stop moving when mouse button is released:
+	  console.log(top_pos + "  , "+left_pos);
+	  console.log(target_element.id);
+    document.onmouseup = null;
+    document.onmousemove = null;
+	  target_element = null;
+  }
+
+  function closeResizeElement() {
+    // stop moving when mouse button is released:
+	  console.log(div_w + "  , "+div_h);
+	  console.log(target_element.id);
+    document.onmouseup = null;
+    document.onmousemove = null;
+	  target_element = null;
+  }
+  
+}
+
+		$(document).ready(function() {
+  
+			var appBanners = document.getElementsByClassName('svgblock');
+			for (var i = 0; i < appBanners.length; i ++) {
+				appBanners[i].style.display = 'none';
+			}//hide all first
+
+
+	  dragElement(document.getElementById("route_1"));
+
+		});
+	  
+      (function () {
+	  function getBlock(n){
+	  var block =[];
+		switch (n)
+		{
+		case 11://orange
+			block = [[0,0,0,1],
+					 [1,1,1,1]];
+			
+			break;
+		case 12://orange
+			block = [[1,0,0,0],
+					 [1,1,1,1]];
+					 
+			break;
+		case 13://orange
+			block = [[1,1,1,1],
+					 [1,0,0,0]];
+					 
+			break;
+		case 14://orange
+			block = [[1,1,1,1],
+					 [0,0,0,1]];
+					 
+			break;
+		case 15://orange
+			block = [[1,0],
+					 [1,0],
+					 [1,0],
+					 [1,1]];
+					 
+			break;
+		case 16://orange
+			block = [[1,1],
+					 [1,0],
+					 [1,0],
+					 [1,0]];
+					 
+			break;
+		case 17://orange
+			block = [[1,1],
+					 [0,1],
+					 [0,1],
+					 [0,1]];
+					 
+			break;
+		case 18://orange
+			block = [[0,1],
+					 [0,1],
+					 [0,1],
+					 [1,1]];
+					 
+			break;
+
+		case 21://blue
+			block = [[1,1,1],
+					 [1,1,1]];
+					 
+			break;
+		case 22://blue
+			block = [[1,1],
+					 [1,1],
+					 [1,1]];
+					 
+			break;
+		case 31://purple
+			block = [[1,1,0,0],
+					 [0,1,1,1]];
+			break;
+		case 32://purple
+			block = [[0,1,1,1],
+					 [1,1,0,0]];
+			break;
+		case 33://purple
+			block = [[0,0,1,1],
+					 [1,1,1,0]];
+			break;
+		case 34://purple
+			block = [[1,1,1,0],
+					 [0,0,1,1]];
+			break;
+		case 35://purple
+			block = [[1,0],
+					 [1,1],
+					 [0,1],
+					 [0,1]];
+			break;
+		case 36://purple
+			block = [[0,1],
+					 [1,1],
+					 [1,0],
+					 [1,0]];
+			break;
+		case 37://purple
+			block = [[1,0],
+					 [1,0],
+					 [1,1],
+					 [0,1]];
+			break;
+		case 38://purple
+			block = [[0,1],
+					 [0,1],
+					 [1,1],
+					 [1,0]];
+			break;
+		case 41://green
+			block = [[0,0,1],
+					 [1,1,1],
+					 [1,0,0]];
+			break;
+		case 42://green
+			block = [[1,0,0],
+					 [1,1,1],
+					 [0,0,1]];
+			break;
+		case 43://green
+			block = [[0,1,1],
+					 [0,1,0],
+					 [1,1,0]];
+			break;
+		case 44://green
+			block = [[1,1,0],
+					 [0,1,0],
+					 [0,1,1]];
+			break;
+		case 51://yellow
+			block = [[1,1,1],
+					 [0,0,1],
+					 [0,0,1]];
+			break;
+		case 52://yellow
+			block = [[1,1,1],
+					 [1,0,0],
+					 [1,0,0]];
+			break;
+		case 53://yellow
+			block = [[1,0,0],
+					 [1,0,0],
+					 [1,1,1]];
+			break;
+		case 54://yellow
+			block = [[0,0,1],
+					 [0,0,1],
+					 [1,1,1]];
+			break;
+		case 61://red
+			block = [[1,1,1,1],
+					 [0,1,0,0]];
+			break;
+		case 62://red
+			block = [[1,1,1,1],
+					 [0,0,1,0]];
+			break;
+		case 63://red
+			block = [[0,0,1,0],
+					 [1,1,1,1]];
+			break;
+		case 64://red
+			block = [[0,1,0,0],
+					 [1,1,1,1]];
+			break;
+		case 65://red
+			block = [[1,0],
+					 [1,1],
+					 [1,0],
+					 [1,0]];
+			break;
+		case 66://red
+			block = [[1,0],
+					 [1,0],
+					 [1,1],
+					 [1,0]];
+			break;
+		case 67://red
+			block = [[0,1],
+					 [1,1],
+					 [0,1],
+					 [0,1]];
+			break;
+		case 68://red
+			block = [[0,1],
+					 [0,1],
+					 [1,1],
+					 [0,1]];
+			break;
+		case 71://pink
+			block = [[1,1,0],
+					 [1,1,1]];
+					 
+			break;
+		case 72://pink
+			block = [[0,1,1],
+					 [1,1,1]];
+					 
+			break;
+		case 73://pink
+			block = [[1,1,1],
+					 [0,1,1]];
+					 
+			break;
+		case 74://pink
+			block = [[1,1,1],
+					 [1,1,0]];
+					 
+			break;
+		case 75://pink
+			block = [[1,0],
+					 [1,1],
+					 [1,1]];
+					 
+			break;
+		case 76://pink
+			block = [[0,1],
+					 [1,1],
+					 [1,1]];
+					 
+			break;
+		case 77://pink
+			block = [[1,1],
+					 [1,1],
+					 [0,1]];
+					 
+			break;
+		case 78://pink
+			block = [[1,1],
+					 [1,1],
+					 [1,0]];
+					 
+			break;
+		case 81://gray
+			block = [[1,0,1],
+					 [1,1,1]];
+					 
+			break;
+		case 82://gray
+			block = [[1,1,1],
+					 [1,0,1]];
+					 
+			break;
+
+		case 83://gray
+			block = [[1,1],
+					 [0,1],
+					 [1,1]];
+					 
+			break;
+		case 84://gray
+			block = [[1,1],
+					 [1,0],
+					 [1,1]];
+					 
+			break;
+
+		}
+		return block;
+	  
+	  }
+      function generate_apad() {
+		var params = new URLSearchParams(window.location.search.slice(1));
+		var today = new Date();
+		var dd = today.getDate();
+		var mm = today.getMonth()+1; 
+		
+		if(params.has('date'))
+		{
+			var date = params.get('date') // 'mdn query string'
+			if(date.match(/[0-9]{4}/))
+			{
+				var tempmm = date.substring(0, 2);
+				var tempdd = date.substring(2, 4);
+				if(tempmm<13 && tempmm>0 && tempdd<32 && tempdd >0)
+				{
+					mm = parseInt(tempmm,10);
+					dd = parseInt(tempdd,10);
+				}
+			}
+			
+		}
+		console.log(mm+' / '+dd);
+		//ga('send', 'event', 'Analysis', 'generate_apad', 'mmdd', mm+' / '+dd);
+		gtag('event', 'generate_apad', {
+		  'event_category': 'Analysis',
+		  'mmdd': mm+' / '+dd
+		});
+        
+			INIT = 0;
+			LIMIT = 9;
+            SIZE = 7;
+	
+            board = [];
+        for (var i = 0; i < SIZE; i++) {
+          var row = [];
+          for (var j = 0; j < SIZE; j++) {
+            row.push(INIT);
+          }
+          board.push(row);
+        }
+		board[0][6] = LIMIT;
+		board[1][6] = LIMIT;
+		board[6][3] = LIMIT;
+		board[6][4] = LIMIT;
+		board[6][5] = LIMIT;
+		board[6][6] = LIMIT;
+		console.log(Math.floor((mm-1)/6)+' , '+(mm-1)%6 +'   /   '+Math.floor((dd-1)/7+2)+','+(dd-1)%7);
+		board[Math.floor((mm-1)/6)][((mm-1)%6)] = LIMIT;
+		board[Math.floor((dd-1)/7+2)][((dd-1)%7)] = LIMIT;
+
+        return board;
+     }
+
+      function solve_apad() {
+	  document.getElementById('apad-button').disabled = true;
+         var SIZE = 7,
+             apad = {}, variables = {}, constraints = [],
+             filled_in = generate_apad();
+
+			function inbox(b ) { // check not out of boundary
+				var x = b[0];
+				var y = b[1];
+				var type = b[2];
+				var direction = b[3];
+				var block,m,n;
+				block = getBlock(type*10+direction);
+				
+				m = block.length;
+				n = (m>0)?block[0].length:0;
+				return (x < (8-m) && y < (8-n));
+	
+			}
+			
+			function noHitLimitation(b ) { // check not hit limitation
+				var x = b[0];
+				var y = b[1];
+				var type = b[2];
+				var direction = b[3];
+				var block,m,n;
+				block = getBlock(type*10+direction);
+				
+				m = block.length;
+				n = (m>0)?block[0].length:0;
+				for (var i=0;i<m;i++ )
+				for (var j=0;j<n;j++ )
+				{
+					if(block[i][j]>0)
+						if(filled_in[x+i][y+j]==LIMIT) return false;
+				}
+				
+				return true;
+				
+			}
+			
+			function connectedvals(array,  x, y)
+			{
+				var count =0;
+				if (array[x][y] != 0 )
+					return 0;
+				array[x][y] = 1;
+				count++;
+
+				if (y + 1 < SIZE)
+					count+=connectedvals(array,  x + 0, y + 1);
+				if (y - 1 >= 0)
+					count+=connectedvals(array,  x + 0, y - 1);
+				if (x + 1 < SIZE)
+					count+=connectedvals(array,  x + 1, y + 0);
+				if (x - 1 >= 0)
+					count+=connectedvals(array,  x - 1, y + 0);
+					
+				return count;
+			}
+			
+			
+
+		 
+         
+		 
+			function checkBlock(b1 , b2 ) { //x, y , type , direction
+				
+				if(inbox(b1)&&noHitLimitation(b1)&&inbox(b2)&&noHitLimitation(b2))
+				{
+					var safe_field = [];//filled_in.slice();//NG
+					for (var i=0;i<SIZE;i++ ){
+						var row = [];
+						for (var j=0;j<SIZE;j++ )
+						{
+							if(filled_in[i][j]==LIMIT)
+								row.push(LIMIT);
+							else
+								row.push(0);
+						}
+						safe_field.push(row);
+					}
+					var x1 = b1[0];
+					var y1 = b1[1];
+					var type1 = b1[2];
+					var direction1 = b1[3];
+					var block1,m1,n1;
+					block1 = getBlock(type1*10+direction1);
+					m1 = block1.length;
+					n1 = (m1>0)?block1[0].length:0;
+		
+					for (var i=0;i<m1;i++ )
+					for (var j=0;j<n1;j++ )
+					{
+						if(block1[i][j]>0)
+							safe_field[x1+i][y1+j]=type1;
+					}
+					
+					var x2 = b2[0];
+					var y2 = b2[1];
+					var type2 = b2[2];
+					var direction2 = b2[3];
+					var block2,m2,n2;
+					block2 = getBlock(type2*10+direction2);
+					m2 = block2.length;
+					n2 = (m2>0)?block2[0].length:0;
+				
+					for (var i=0;i<m2;i++ )
+					for (var j=0;j<n2;j++ )
+					{
+						if(block2[i][j]>0)
+						{
+							if(safe_field[x2+i][y2+j]>0) return false;
+							safe_field[x2+i][y2+j]=type2;
+						}
+						
+					}
+					for (var i=0;i<SIZE;i++ ){
+						for (var j=0;j<SIZE;j++ )
+						{
+							if(safe_field[i][j]==INIT)
+							{
+								var result = connectedvals(safe_field.slice(),  i, j);
+								if(result<5 || result %5 >1)
+									return false;
+							}
+		
+						}
+						
+					}
+					//console.log(JSON.stringify(b1)+" safe to "+JSON.stringify(b2));
+					return true;
+					
+				}
+			
+			return false;
+		 }
+		 
+			var BLOCK_TYPES = 8;
+			for (var k = 1; k <= BLOCK_TYPES; k++){
+				for (var k2 = 1; k2 <= BLOCK_TYPES; k2++) {
+					if (k2 != k) {
+						constraints.push([k, k2,  checkBlock]);
+					
+					}
+				}
+				var domain = []
+				 
+				for (var z = 1; z <= 8; z++) {
+					var tempb = getBlock(k*10+z);
+					if(tempb.length>0)
+					{
+						//console.log("getBlock("+(k*10+z)+")->("+JSON.stringify(tempb));
+			
+						for (var i = 0; i < SIZE; i++) 
+						for (var j = 0; j < SIZE; j++) {
+							var var_block = [i,j,k,z];
+							if(inbox(var_block)&&noHitLimitation(var_block))
+							{
+								domain.push(var_block);
+								//variables[k] = var_block;
+								//console.log("variables("+k+"->("+i+","+j+","+k+","+z+")");
+							}	
+						
+						}
+					}
+				}
+				variables[k]=domain;
+
+			}
+         // Braces hell. Sorry.
+
+         apad.variables = variables;
+         apad.constraints = constraints;
+
+         
+		 var node = document.getElementById('apad');
+		 var vis_count = 0;
+		function visualize(assigned) {
+			vis_count ++;
+			//console.log("vis->" + JSON.stringify(assigned));
+	
+			var appBanners = document.getElementsByClassName('svgblock');
+			for (var i = 0; i < appBanners.length; i ++) {
+				appBanners[i].style.display = 'none';
+			}//hide all first
+	
+			 
+			var count = 0 ;
+			for (const key in assigned) {
+			count ++;
+				var solution = assigned[key][0];
+				//console.log("solution = "+solution);
+				var x = solution[0];
+				var y = solution[1];
+				var type = solution[2];
+				var direction = solution[3];
+				var block,m,n;
+				block = getBlock(type*10+direction);
+						// id="_x38_4" class="svgblock" fill=
+				var svgblock = document.getElementById('x3'+type+'_'+direction);
+				//var svgblock = $("#apad-map").contents().find("#x3"+type+"_"+direction)
+				if (svgblock) {
+					//console.log("we got "+svgblock);
+					var xOffset = (y+1)*43;//Notice here
+					var yOffset = (x+1)*43;
+					var transformAttr = ' translate(' + xOffset + ',' + yOffset + ')';
+					svgblock.setAttribute('transform', transformAttr);
+					svgblock.style.display = '';
+				}
+					
+					//console.log("block = "+JSON.stringify(block));
+				m = block.length;
+				n = block[0].length;
+				for (var i=0;i<m;i++ )
+				for (var j=0;j<n;j++ )
+				{
+					if(block[i][j]>0)
+					{
+						//console.log("set("+(x+i)+","+(y+j)+" ) as "+type);
+						filled_in[x+i][y+j]=type;
+					}
+				}
+			}
+			if(count==8)
+			{
+			console.log("vis->" + JSON.stringify(assigned));
+			console.log("total count " + vis_count + " times");
+			//ga('send', 'event', 'Analysis', 'visual_complete', 'vis_count', vis_count);
+			gtag('event', 'visual_complete', {
+				'event_category': 'Analysis',
+				'vis_count': vis_count
+			});
+			}
+			//$("#drawbase").html($("#drawbase").html());
+				var text = '', divider = '';
+				for (var i = 0; i < SIZE * 6 + 1; i++) { divider += '-'; }
+				text += divider + '<br/>'
+			for (var i = 0; i < SIZE; i++) {
+				for (var j = 0; j < SIZE; j++) {
+					text += '|';
+					var mid = filled_in[i][j];
+				if(mid==INIT)
+					text += '&nbsp; ' + '?' + ' &nbsp;';
+				else if(mid==LIMIT)
+					text += '&nbsp; ' + 'X' + ' &nbsp;';
+				else
+					text += '&nbsp; ' + mid + ' &nbsp;';
+				}
+				text += '|<br/>' + divider + '<br/>'
+			}
+			  node.innerHTML = text;
+			   return text;
+		}
+
+         apad.cb = visualize;
+         apad.timeStep = 250;
+
+         visualize({});
+         var result = csp.solve(apad);
+         if (result == 'FAILURE') { console.log(result); }
+       }
+       
+       document.getElementById('apad-button').onclick =  solve_apad;//function () 
+      })();
+
+      </script>
+
+
+
+      </section>
+      <footer>
+        <!--<p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>-->
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>
