@@ -535,20 +535,26 @@ input:checked + .slider:before {
 					id = setInterval(frame, 5);
 
 					function frame() {
+						var pos_before = pos;
 						if (pos > 100) {
 							step *= -1;
 							pos+=step;
-							count--;
 						  //clearInterval(id);
 						} else if (pos < 0) {
 							step *= -1;
 							pos+=step;
-							count--;
 						  //clearInterval(id);
 						}
 
 						if(running && count != 0){
 						  pos+=step;
+
+							//console.log(pos_before + " / "+pos+" / "+step);
+							if( pos_before <50 && pos >= 50 && step >0)
+							{
+								count--;
+								//console.log("count = "+count);
+							}
 						  if(harmonic)
 						  {
 							  var hpos=-50.0*Math.cos(pos/100.0*Math.PI)+50;
