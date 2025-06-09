@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <title>Minimax API Tester</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        input, button { padding: 8px; margin: 5px 0; width: 100%; }
+        .output { background: #f0f0f0; padding: 10px; margin-top: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+<h2>🔑 Authorization Token</h2>
+<input type="text" id="authToken" placeholder="請輸入 Authorization Token" />
+<button onclick="saveAuth()">儲存 Token</button>
+
+<hr/>
+
+<h2>① 送出 video_generation</h2>
+<button onclick="generateVideo()">送出 video_generation</button>
+<div class="output" id="output1"></div>
+
+<h2>② 查詢 video_generation 狀態</h2>
+<button onclick="queryVideo()">查詢 video_generation</button>
+<div class="output" id="output2"></div>
+
+<h2>③ 取得影片 download_url</h2>
+<button onclick="retrieveFile()">取得影片 download_url</button>
+<div class="output" id="output3"></div>
+
+<script>
+    // 儲存 Authorization 到 Cookie
+    function saveAuth() {
+        const token = document.getElementById('authToken').value;
+        document.cookie = `authToken=${encodeURIComponent(token)}; path=/; max-age=31536000`; // 保存一年
+        alert('已儲存 Token');
+    }
+
+    // 讀取 Cookie 裡的 Authorization
+    function getAuth() {
+        const match = document.cookie.match(/(?:^|; )authToken=([^;]*)/);
+        return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    // 共用變數
+    let task_id = '';
+    let file_id = '';
+
+    async function generateVideo() {
+        const auth = getAuth();
+        if (!auth) { alert('請先儲存 Authorization Token'); return; }
+
+        const res = await fetch('https://api.minimax.chat/v1/video_generation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer '+auth
+            },
+            body: JSON.stringify({
+                "model": "I2V-01-live",
+                "prompt": "鏡頭稍微搖晃 主角有時候會眨眼 切換適合的表情",
+                "first_frame_image": "https://img3.qy0.ru/data/1259/70/09.jpg"
+            })
+        });
+
+        const data = await res.json();
+        task_id = data.task_id || '';
+        document.getElementById('output1').innerHTML = `
+            status: ${data.base_resp?.status_msg} <br/>
+            task_id: ${task_id}
+        `;
+    }
+
+    async function queryVideo() {
+        const auth = getAuth();
+        if (!auth) { alert('請先儲存 Authorization Token'); return; }
+        if (!task_id) { alert('請先送出 video_generation 取得 task_id'); return; }
+
+        const url = `https://api.minimax.chat/v1/query/video_generation?task_id=${task_id}`;
+        const res = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer '+auth
+            }
+        });
+
+        const data = await res.json();
+        file_id = data.file_id || '';
+        document.getElementById('output2').innerHTML = `
+            status: ${data.base_resp?.status_msg} <br/>
+            file_id: ${file_id} <br/>
+            status: ${data.status}
+        `;
+    }
+
+    async function retrieveFile() {
+        const auth = getAuth();
+        if (!auth) { alert('請先儲存 Authorization Token'); return; }
+        if (!file_id) { alert('請先查詢 video_generation 取得 file_id'); return; }
+
+        const url = `https://api.minimax.chat/v1/files/retrieve?GroupId=1743503684043543083&file_id=${file_id}`;
+        const res = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer '+auth
+            }
+        });
+
+        const data = await res.json();
+        const downloadUrl = data.file?.download_url || '';
+
+        document.getElementById('output3').innerHTML = `
+            status: ${data.base_resp?.status_msg} <br/>
+            download_url: <a href="${downloadUrl}" target="_blank">${downloadUrl}</a>
+        `;
+    }
+
+    // 初始化時自動讀取 cookie 裡的 token 填入 input
+    window.onload = () => {
+        document.getElementById('authToken').value = getAuth();
+    };
+</script>
+
+</body>
+</html>
