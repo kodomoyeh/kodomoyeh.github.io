@@ -5,7 +5,7 @@
     <title>Minimax API Tester</title>
     <style>
         body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
-        input, button { padding: 8px; margin: 5px 0; width: 100%; }
+        input, button, textarea { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; }
         .output { background: #f0f0f0; padding: 10px; margin-top: 10px; border-radius: 5px; }
     </style>
 </head>
@@ -18,6 +18,12 @@
 <hr/>
 
 <h2>① 送出 video_generation</h2>
+<label>🎬 prompt：</label>
+<textarea id="promptInput" rows="3" placeholder="請輸入 prompt...">鏡頭稍微搖晃 主角有時候會眨眼 切換適合的表情</textarea>
+
+<label>🖼️ first_frame_image URL：</label>
+<input type="text" id="imageInput" placeholder="請輸入圖片 URL..." value="https://img3.qy0.ru/data/1259/70/09.jpg" />
+
 <button onclick="generateVideo()">送出 video_generation</button>
 <div class="output" id="output1"></div>
 
@@ -51,6 +57,14 @@
         const auth = getAuth();
         if (!auth) { alert('請先儲存 Authorization Token'); return; }
 
+        const prompt = document.getElementById('promptInput').value.trim();
+        const imageUrl = document.getElementById('imageInput').value.trim();
+
+        if (!prompt || !imageUrl) {
+            alert('請填寫 prompt 和圖片 URL');
+            return;
+        }
+
         const res = await fetch('https://api.minimax.chat/v1/video_generation', {
             method: 'POST',
             headers: {
@@ -59,8 +73,8 @@
             },
             body: JSON.stringify({
                 "model": "I2V-01-live",
-                "prompt": "鏡頭稍微搖晃 主角有時候會眨眼 切換適合的表情",
-                "first_frame_image": "https://img3.qy0.ru/data/1259/70/09.jpg"
+                "prompt": prompt,
+                "first_frame_image": imageUrl
             })
         });
 
