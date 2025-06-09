@@ -11,11 +11,11 @@ body {
             line-height: 1.6;
             background-color: #fafafa;
             color: #333;
-       
+            max-width: 600px;
             margin: auto;
         }
         h2 {
-            font-size: 3rem;
+            font-size: 1.4rem;
             margin-top: 1.5em;
             border-left: 5px solid #4CAF50;
             padding-left: 10px;
@@ -30,7 +30,7 @@ body {
             margin: 8px 0;
             width: 100%;
             box-sizing: border-box;
-            font-size: 2rem;
+            font-size: 1rem;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
@@ -39,7 +39,6 @@ body {
             color: white;
             cursor: pointer;
             font-weight: bold;
-            font-size: 3rem;
         }
         button:hover {
             background-color: #45a049;
@@ -58,6 +57,26 @@ body {
             border-top: 1px solid #ddd;
         }
 
+        /* 手機專用 RWD */
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+                font-size: 1.2rem;
+            }
+            h2 {
+                font-size: 1.6rem;
+            }
+            input, button, textarea {
+                font-size: 1.2rem;
+                padding: 14px;
+            }
+            button {
+                font-size: 1.3rem;
+            }
+            .output {
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body>
