@@ -94,15 +94,15 @@ body {
 <label>🖼️ first_frame_image URL：</label>
 <input type="text" id="imageInput" placeholder="請輸入圖片 URL..." value="https://img3.qy0.ru/data/1259/70/09.jpg" />
 
-<button onclick="generateVideo()">送出 video_generation</button>
+<button id="b1" onclick="generateVideo()">1. Generate video</button>
 <div class="output" id="output1"></div>
 
 <h2>② 查詢 video_generation 狀態</h2>
-<button onclick="queryVideo()">查詢 video_generation</button>
+<button id="b2" onclick="queryVideo()">2. check status</button>
 <div class="output" id="output2"></div>
 
 <h2>③ 取得影片 download_url</h2>
-<button onclick="retrieveFile()">取得影片 download_url</button>
+<button id="b3" onclick="retrieveFile()">3. Get download_url</button>
 <div class="output" id="output3"></div>
 
 <script>
@@ -121,7 +121,7 @@ body {
 
     function saveTask() {
         document.cookie = `task_id=${encodeURIComponent(task_id)}; path=/; max-age=31536000`; // 保存一年
-        alert('已儲存 task_id');
+        //alert('已儲存 task_id');
     }
 
     // 讀取 Cookie 裡的 Authorization
@@ -132,7 +132,7 @@ body {
 
     function saveFile() {
         document.cookie = `file_id=${encodeURIComponent(file_id)}; path=/; max-age=31536000`; // 保存一年
-        alert('已儲存 file_id');
+        //alert('已儲存 file_id');
     }
 
     // 讀取 Cookie 裡的 Authorization
@@ -156,7 +156,8 @@ body {
             alert('請填寫 prompt 和圖片 URL');
             return;
         }
-
+        document.getElementById('b1').style.backgroundColor = '#999999';
+        document.getElementById('output1').innerHTML = 'sending...';
         const res = await fetch('https://api.minimax.chat/v1/video_generation', {
             method: 'POST',
             headers: {
@@ -169,10 +170,13 @@ body {
                 "first_frame_image": imageUrl
             })
         });
-
+        document.getElementById('b1').style.backgroundColor = '#4CAF50';
         const data = await res.json();
         task_id = data.task_id || '';
-        saveTask();
+        if(task_id.length > 0)
+        {
+            saveTask();
+        }
         document.getElementById('output1').innerHTML = `
             status: ${data.base_resp?.status_msg} <br/>
             task_id: ${task_id}
@@ -186,16 +190,22 @@ body {
         if (!task_id) { alert('請先送出 video_generation 取得 task_id'); return; }
 
         const url = `https://api.minimax.chat/v1/query/video_generation?task_id=${task_id}`;
+
+        document.getElementById('b2').style.backgroundColor = '#999999';
+        document.getElementById('output2').innerHTML = 'sending...';
         const res = await fetch(url, {
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer '+auth
             }
         });
-
+        document.getElementById('b2').style.backgroundColor = '#4CAF50';
         const data = await res.json();
         file_id = data.file_id || '';
-        saveFile();
+        if(file_id.length > 0)
+        {
+            saveFile();
+        }
         document.getElementById('output2').innerHTML = `
             status: ${data.base_resp?.status_msg} <br/>
             file_id: ${file_id} <br/>
@@ -210,12 +220,15 @@ body {
         if (!file_id) { alert('請先查詢 video_generation 取得 file_id'); return; }
 
         const url = `https://api.minimax.chat/v1/files/retrieve?GroupId=1743503684043543083&file_id=${file_id}`;
+        document.getElementById('b3').style.backgroundColor = '#999999';
+        document.getElementById('output3').innerHTML = 'sending...';
         const res = await fetch(url, {
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer '+auth
             }
         });
+        document.getElementById('b3').style.backgroundColor = '#4CAF50';
 
         const data = await res.json();
         const downloadUrl = data.file?.download_url || '';
