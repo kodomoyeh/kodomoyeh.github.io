@@ -234,6 +234,7 @@ body {
         const downloadUrl = data.file?.download_url || '';
 
         document.getElementById('output3').innerHTML = `
+            file_id: ${data.file?.file_id} <br/>
             status: ${data.base_resp?.status_msg} <br/>
             download_here: <a href="${downloadUrl}" target="_blank">link</a>
         `;
