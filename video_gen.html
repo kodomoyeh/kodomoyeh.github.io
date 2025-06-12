@@ -211,6 +211,9 @@ body {
             file_id: ${file_id} <br/>
             status: ${data.status}
         `;
+        if (data.status?.toLowerCase() === 'success') {
+            retrieveFile();
+        }
     }
 
     async function retrieveFile() {
