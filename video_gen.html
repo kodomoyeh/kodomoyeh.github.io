@@ -81,29 +81,26 @@ body {
 </head>
 <body>
 
-<h2>🔑 Authorization Token</h2>
-<input type="text" id="authToken" placeholder="請輸入 Authorization Token" />
-<button onclick="saveAuth()">儲存 Token</button>
-
-<hr/>
-
 <h2>① 送出 video_generation</h2>
 <label>🎬 prompt：</label>
-<textarea id="promptInput" rows="3" placeholder="請輸入 prompt...">鏡頭稍微搖晃 主角有時候會眨眼 切換適合的表情</textarea>
+<textarea id="promptInput" rows="3" placeholder="請輸入 prompt...">With lazy slut eyes and sexy pose touch hip,and brass</textarea>
 
 <label>🖼️ first_frame_image URL：</label>
-<input type="text" id="imageInput" placeholder="請輸入圖片 URL..." value="https://img3.qy0.ru/data/1259/70/09.jpg" />
+<input type="text" id="imageInput" placeholder="請輸入圖片 URL..." value="https://img3.qy0.ru/data/1303/24/56.jpg" />
 
 <button id="b1" onclick="generateVideo()">1. Generate video</button>
 <div class="output" id="output1"></div>
 
-<h2>② 查詢 video_generation 狀態</h2>
+<h2>② 查詢 generation 狀態</h2>
 <button id="b2" onclick="queryVideo()">2. check status</button>
 <div class="output" id="output2"></div>
 
-<h2>③ 取得影片 download_url</h2>
-<button id="b3" onclick="retrieveFile()">3. Get download_url</button>
-<div class="output" id="output3"></div>
+<hr/>
+
+<h2>🔑 Authorization Token</h2>
+<input type="text" id="authToken" placeholder="請輸入 Authorization Token" />
+<button onclick="saveAuth()">儲存 Token</button>
+
 
 <script>
     // 儲存 Authorization 到 Cookie
@@ -223,20 +220,20 @@ body {
         if (!file_id) { alert('請先查詢 video_generation 取得 file_id'); return; }
 
         const url = `https://api.minimax.chat/v1/files/retrieve?GroupId=1743503684043543083&file_id=${file_id}`;
-        document.getElementById('b3').style.backgroundColor = '#999999';
-        document.getElementById('output3').innerHTML = 'sending...';
+        //document.getElementById('b3').style.backgroundColor = '#999999';
+        //document.getElementById('output3').innerHTML = 'sending...';
         const res = await fetch(url, {
             method: 'GET',
             headers: {
                 'Authorization': 'Bearer '+auth
             }
         });
-        document.getElementById('b3').style.backgroundColor = '#4CAF50';
+        //document.getElementById('b3').style.backgroundColor = '#4CAF50';
 
         const data = await res.json();
         const downloadUrl = data.file?.download_url || '';
 
-        document.getElementById('output3').innerHTML = `
+        document.getElementById('output2').innerHTML = `
             file_id: ${data.file?.file_id} <br/>
             status: ${data.base_resp?.status_msg} <br/>
             download_here: <a href="${downloadUrl}" target="_blank">link</a>
