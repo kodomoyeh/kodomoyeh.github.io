@@ -25,7 +25,7 @@ body {
             display: block;
             margin-top: 10px;
         }
-        input, button, textarea {
+        input[type=text], button, textarea {
             padding: 12px;
             margin: 8px 0;
             width: 100%;
@@ -66,7 +66,7 @@ body {
             h2 {
                 font-size: 1.6rem;
             }
-            input, button, textarea {
+            input[type=text], button, textarea {
                 font-size: 1.2rem;
                 padding: 14px;
             }
@@ -86,8 +86,8 @@ body {
 <textarea id="promptInput" rows="3" placeholder="請輸入 prompt...">With lazy slut eyes and sexy pose touch hip,and breast</textarea>
 
 <label>🖼️ 圖片來源：</label>
-<input type="radio" name="imgMode" value="url" checked> 使用圖片 URL
-<input type="radio" name="imgMode" value="file"> 上傳本機圖片
+<input type="radio" name="imgMode" value="url" checked onchange="toggleImageInput()"> 使用圖片 URL
+<input type="radio" name="imgMode" value="file" onchange="toggleImageInput()"> 上傳本機圖片
 
 <div id="urlInputWrapper">
   <input type="text" id="imageInput" placeholder="輸入圖片 URL" value="https://img3.qy0.ru/data/1303/24/56.jpg" />
@@ -147,6 +147,13 @@ body {
         return match ? decodeURIComponent(match[1]) : '';
     }
 
+    function toggleImageInput() {
+        const mode = document.querySelector('input[name="imgMode"]:checked').value;
+
+        document.getElementById('urlInputWrapper').style.display = mode === 'url' ? 'block' : 'none';
+        document.getElementById('fileInputWrapper').style.display = mode === 'file' ? 'block' : 'none';
+    }
+
     function getImageInput() {
         const mode = document.querySelector('input[name="imgMode"]:checked').value;
 
@@ -197,7 +204,7 @@ body {
             body: JSON.stringify({
                 "model": "I2V-01-live",
                 "prompt": prompt,
-                "first_frame_image": imageUrl
+                "first_frame_image": img
             })
         });
         document.getElementById('b1').style.backgroundColor = '#4CAF50';
@@ -275,6 +282,7 @@ body {
 
     // 初始化時自動讀取 cookie 裡的 token 填入 input
     window.onload = () => {
+        toggleImageInput(); // 初始狀態顯示正確欄位
         document.getElementById('authToken').value = getAuth();
     };
 </script>
