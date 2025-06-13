@@ -85,8 +85,17 @@ body {
 <label>🎬 prompt：</label>
 <textarea id="promptInput" rows="3" placeholder="請輸入 prompt...">With lazy slut eyes and sexy pose touch hip,and breast</textarea>
 
-<label>🖼️ first_frame_image URL：</label>
-<input type="text" id="imageInput" placeholder="請輸入圖片 URL..." value="https://img3.qy0.ru/data/1303/24/56.jpg" />
+<label>🖼️ 圖片來源：</label>
+<input type="radio" name="imgMode" value="url" checked> 使用圖片 URL
+<input type="radio" name="imgMode" value="file"> 上傳本機圖片
+
+<div id="urlInputWrapper">
+  <input type="text" id="imageInput" placeholder="輸入圖片 URL" value="https://img3.qy0.ru/data/1303/24/56.jpg" />
+</div>
+
+<div id="fileInputWrapper" style="display:none;">
+  <input type="file" id="imageFile" accept="image/*" />
+</div>
 
 <button id="b1" onclick="generateVideo()">1. Generate video</button>
 <div class="output" id="output1"></div>
@@ -138,6 +147,24 @@ body {
         return match ? decodeURIComponent(match[1]) : '';
     }
 
+    function getImageInput() {
+        const mode = document.querySelector('input[name="imgMode"]:checked').value;
+
+        if (mode === 'url') {
+            return document.getElementById('imageInput').value.trim();
+        }
+
+        const fileInput = document.getElementById('imageFile');
+        const file = fileInput.files[0];
+        if (!file) return '';
+
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result); // reader.result 是 base64
+            reader.onerror = reject;
+            reader.readAsDataURL(file); // output: data:image/jpeg;base64,...
+        });
+    }
     // 共用變數
     let task_id = '';
     let file_id = '';
@@ -149,10 +176,16 @@ body {
         const prompt = document.getElementById('promptInput').value.trim();
         const imageUrl = document.getElementById('imageInput').value.trim();
 
-        if (!prompt || !imageUrl) {
-            alert('請填寫 prompt 和圖片 URL');
+        if (!prompt ) {
+            alert('請填寫 prompt ');
             return;
         }
+        const img = await getImageInput();
+        if (!img) {
+            alert('請選擇圖片');
+            return;
+        }
+
         document.getElementById('b1').style.backgroundColor = '#999999';
         document.getElementById('output1').innerHTML = 'sending...';
         const res = await fetch('https://api.minimax.chat/v1/video_generation', {
