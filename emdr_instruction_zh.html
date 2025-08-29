@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EMDR Lightbar 連線與操作 SOP（iOS / Android）</title>
+  <style>
+    :root{
+      --bg:#f7f7fb; --card:#ffffff; --ink:#111827; --muted:#6b7280; --accent:#16a34a;
+      --border:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; padding:24px; background:var(--bg); color:var(--ink);
+      font:16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, Noto Sans TC, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+    .wrap{max-width:900px; margin:0 auto}
+    header{margin:8px 0 20px}
+    h1{font-size:clamp(22px,4.5vw,36px); margin:.2em 0 .3em; letter-spacing:.5px}
+    p.lead{color:var(--muted); margin-top:0}
+    .card{
+      background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; margin:16px 0;
+      box-shadow:0 1px 0 rgba(17,24,39,.02), 0 8px 24px rgba(17,24,39,.04);
+    }
+    h2{font-size:clamp(18px,3.6vw,26px); margin:.2em 0 .6em}
+    h3{font-size:clamp(16px,3.2vw,22px); margin:1em 0 .4em}
+    .steps{counter-reset:step}
+    .step{
+      border-left:4px solid var(--border); padding:14px 16px; margin:14px 0; background:#fff; border-radius:12px;
+    }
+    .step::before{
+      counter-increment:step; content:counter(step);
+      display:inline-grid; place-items:center; width:28px; height:28px; margin-right:10px;
+      background:var(--accent); color:#fff; border-radius:999px; font-weight:700;
+    }
+    .step > .ttl{display:flex; align-items:center; font-weight:700; gap:8px}
+    .muted{color:var(--muted)}
+    .kbd{
+      display:inline-block; padding:.15em .45em; border:1px solid var(--border); border-bottom-width:2px;
+      background:#fff; border-radius:6px; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    .grid{display:grid; gap:16px}
+    @media (min-width:760px){ .grid.cols-2{grid-template-columns:1fr 1fr} }
+    details{border:1px dashed var(--border); border-radius:12px; padding:12px 14px; background:#fcfcfe}
+    details summary{cursor:pointer; font-weight:700}
+    .btn{
+      display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:10px; border:1px solid var(--border);
+      background:#fff; text-decoration:none; color:var(--ink)
+    }
+    .btn.primary{background:var(--accent); color:#fff; border-color:transparent}
+    .callout{border-left:6px solid var(--accent); background:#ecfdf5; padding:12px 14px; border-radius:10px}
+    .list-tight li{margin:.25em 0}
+    footer{color:var(--muted); font-size:14px; margin:24px 0 8px}
+    .ip{font-weight:700}
+    .tag{display:inline-block; padding:.2em .5em; background:#eef2ff; color:#3730a3; border-radius:6px; font-size:.9em}
+    .warn{color:#d97706; font-weight:700}
+    .ok{color:var(--accent); font-weight:700}
+    .demo-img {
+  width:100%;
+  display:block;
+  margin:0 auto 12px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.1);
+  max-width:500px; /* 桌機上限 */
+}
+@media (max-width:640px) {
+  .demo-img {
+    max-width:300px; /* 手機上限 */
+  }
+}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>EMDR Lightbar 連線與操作 SOP</h1>
+    <p class="lead">本裝置會建立 <span class="tag">Wi-Fi 熱點（無對外網路）</span>。為避免手機自動切換到其他可上網的基地台，請先把其他常用 Wi-Fi 的「自動連線」關閉（作業結束後再打開）。</p>
+  </header>
+
+  <div class="card">
+    <h2>快速三步驟</h2>
+    <div class="steps">
+      <div class="step"><span class="ttl">關閉其他 Wi-Fi 的「自動連線」</span>
+        <div class="muted">iOS：到 <span class="kbd">設定 → Wi-Fi → (你的家用/公司網路) ⓘ</span>，把 <b>自動加入</b> 關掉。<br>
+          Android：到 <span class="kbd">設定 → 網路與網際網路 / Wi-Fi → 已儲存的網路</span>，把常用網路的 <b>自動連線 / 自動重新連線</b> 關掉。</div>
+      </div>
+      <div class="step"><span class="ttl">連上 Lightbar 熱點</span>
+        在手機 Wi-Fi 清單選擇你的 Lightbar（例如 <span class="kbd">EMDR_XXXX</span>），輸入密碼。看到「無網際網路」提示屬正常，請選擇 <b>仍要保留連線</b>。
+      </div>
+      <div class="step"><span class="ttl">開啟控制頁</span>
+        打開瀏覽器並進入 <span class="ip">http://192.168.4.1 建議將此ip加入我的最愛並設定為好記的名字，例如 <span class="kbd">EMDR 控制播放</span> </span>。
+        <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap">
+          <a class="btn primary" href="http://192.168.4.1" target="_blank" rel="noopener">開啟 192.168.4.1</a>
+          <button class="btn" onclick="copyText('http://192.168.4.1')">複製網址</button>
+        </div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:14px"><b>提醒：</b>若瀏覽器顯示「沒有網路」，仍可造訪 <span class="ip">192.168.4.1</span>（它是區域網路位址）。</div>
+  </div>
+
+  <div class="grid cols-2">
+    <section class="card">
+      <h2>iOS（iPhone / iPad）</h2>
+      <ol class="list-tight">
+        <li>到 <span class="kbd">設定 → Wi-Fi</span>。在「我的網路」中，對<b>其他常用基地台</b>（家用、公司等）點選 <span class="kbd">ⓘ</span> → 關閉 <b>自動加入</b>（或使用「忽略此網路」暫時移除）。</li>
+        <li>在 Wi-Fi 清單中選擇 <span class="kbd">EMDR_XXXX</span>，輸入密碼並連線。</li>
+        <li>若出現「此網路沒有網際網路」，請點「<b>仍要保留連線</b>」。</li>
+        <li>打開 Safari / Chrome，輸入 <span class="ip">192.168.4.1</span> 進入控制介面。</li>
+      </ol>
+      <details style="margin-top:10px">
+        <summary>進階（如有斷線/跳網）</summary>
+        <ul class="list-tight">
+          <li>暫時關閉 <span class="kbd">設定 → 行動服務 → Wi-Fi 輔助</span>（如你的機型有此選項）。</li>
+          <li>若系統自動彈出登入頁（Captive Portal）卻空白，請直接開瀏覽器手動輸入 <span class="ip">192.168.4.1</span>。</li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="card">
+      <h2>Android（各品牌）</h2>
+      <ol class="list-tight">
+        <li>到 <span class="kbd">設定 → 網路與網際網路 / 連線 → Wi-Fi → 已儲存/已知的網路</span>，將<b>其他常用基地台</b>的 <b>自動連線 / 自動重新連線</b> 關閉（或按「忘記」暫時移除）。</li>
+        <li>在 Wi-Fi 清單選擇 <span class="kbd">EMDR_XXXX</span>，輸入密碼並連線。</li>
+        <li>若系統提示「沒有網際網路」，請選擇「<b>仍保留</b> / <b>保持連線</b>」。</li>
+        <li>打開瀏覽器，輸入 <span class="ip">192.168.4.1</span> 進入控制介面。</li>
+      </ol>
+      <details style="margin-top:10px">
+        <summary>進階（品牌差異設定）</summary>
+        <ul class="list-tight">
+          <li><b>Samsung：</b>Wi-Fi → 右上角 <span class="kbd">⋮</span> → <b>進階</b> → 關閉「<b>切換到行動數據</b> / <b>智慧網路切換</b>」。</li>
+          <li><b>Pixel / 原生：</b>Wi-Fi → 網路偏好設定 → 關閉「<b>自動切換到行動數據</b> / <b>切換到更佳網路</b>」。</li>
+          <li><b>MIUI / 其他：</b>尋找 <b>Wi-Fi 助手 / 網路輔助</b> 類似選項並關閉。</li>
+        </ul>
+      </details>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>在控制頁上操作</h2>
+      <img src="./img/emdr_phone.png" 
+       alt="EMDR Lightbar 控制頁範例"
+       class="demo-img" />
+    <ul class="list-tight">
+      <li>調整 <b>Speed（BPM）</b>、選擇 <b>Color</b>、設定 <b>Move Mode</b> 與 <b>Move Count</b>。</li>
+      <li>先按 <b>Set up</b> 套用設定，再按 <b>Start / Stop</b> 控制播放。</li>
+      <li>光點移動中仍然可更改設定，同樣需要按下 <b>Set up</b> 才會套用設定。</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>常見問題（Troubleshooting）</h2>
+    <details open>
+      <summary>無法開啟 192.168.4.1</summary>
+      <ul class="list-tight">
+        <li>確認仍連到 Lightbar 熱點，且未被手機自動切到其他基地台。</li>
+        <li>若瀏覽器一直嘗試上網，可暫時關閉 <b>行動數據</b> 再試一次。</li>
+        <li>重新連線 Wi-Fi 後，手動輸入完整網址：<span class="ip">http://192.168.4.1</span>。</li>
+      </ul>
+    </details>
+    <details>
+      <summary>操作中容易斷線 / 速度不穩</summary>
+      <ul class="list-tight">
+        <li>保持與裝置 1–3 公尺內且障礙物少。</li>
+        <li>避免開啟省電模式，螢幕請保持常亮。</li>
+      </ul>
+    </details>
+    <details>
+      <summary>結束使用後要做什麼？</summary>
+      <ul class="list-tight">
+        <li class="ok">回到手機設定，將剛才關閉的「自動連線」重新打開。</li>
+        <li>恢復連回原本的 Wi-Fi 或行動數據。</li>
+      </ul>
+    </details>
+  </section>
+
+  <footer>
+    本頁說明僅用於 <b>Lightbar</b> 的區域連線情境；裝置不提供外部上網是正常行為。©
+  </footer>
+</div>
+
+<script>
+  function copyText(t){
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(t).then(()=>alert('已複製：'+t));
+    }else{
+      const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); ta.remove(); alert('已複製：'+t);
+    }
+  }
+</script>
+</body>
+</html>
