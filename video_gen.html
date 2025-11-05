@@ -83,7 +83,7 @@ body {
 
 <h2>① 送出 video_generation</h2>
 <label>🎬 prompt：</label>
-<textarea id="promptInput" rows="3" placeholder="請輸入 prompt...">With lazy slut eyes and sexy pose touch hip,and breast</textarea>
+<textarea id="promptInput" rows="3" placeholder="請輸入 prompt...">A tiktok dancer is dancing</textarea>
 
 <label>🖼️ 圖片來源：</label>
 <input type="radio" name="imgMode" value="url" checked onchange="toggleImageInput()"> 使用圖片 URL
@@ -202,7 +202,7 @@ body {
                 'Authorization': 'Bearer '+auth
             },
             body: JSON.stringify({
-                "model": "MiniMax-Hailuo-02",
+                "model": "MiniMax-Hailuo-2.3-Fast",
                 "prompt": prompt,
                 "duration" : 10,
                 "first_frame_image": img
