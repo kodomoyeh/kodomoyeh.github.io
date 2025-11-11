@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Video Template Generation Tester</title>
+    <style>
+body {
+            font-family: sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+            background-color: #fafafa;
+            color: #333;
+            max-width: 600px;
+            margin: auto;
+        }
+        h2 {
+            font-size: 1.4rem;
+            margin-top: 1.5em;
+            border-left: 5px solid #4CAF50;
+            padding-left: 10px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        input[type=text], button, textarea, select {
+            padding: 12px;
+            margin: 8px 0;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .output {
+            background: #f0f0f0;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 5px;
+            font-size: 1rem;
+            word-break: break-word;
+        }
+        hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 1px solid #ddd;
+        }
+
+        /* 手機專用 RWD */
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+                font-size: 1.2rem;
+            }
+            h2 {
+                font-size: 1.6rem;
+            }
+            input[type=text], button, textarea, select {
+                font-size: 1.2rem;
+                padding: 14px;
+            }
+            button {
+                font-size: 1.3rem;
+            }
+            .output {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h2>① 送出 video_template_generation</h2>
+<label for="templateIdInput">📜 範本 (template_id)：</label>
+<select id="templateIdInput">
+    <option value="393769180141805569">大逃殺</option>
+    <option value="392753057216684038">跳水</option>
+</select>
+
+<label for="textInput1">✏️ 文字輸入 (text_inputs)：</label>
+<input type="text" id="textInput1" placeholder="請輸入文字..." value="狂風暴雨" />
+
+<label>🖼️ 圖片來源：</label>
+<input type="radio" name="imgMode" value="url" checked onchange="toggleImageInput()"> 使用圖片 URL
+<input type="radio" name="imgMode" value="file" onchange="toggleImageInput()"> 上傳本機圖片
+
+<div id="urlInputWrapper">
+  <input type="text" id="imageInput" placeholder="輸入圖片 URL" value="https://img3.qy0.ru/data/1303/24/56.jpg" />
+</div>
+
+<div id="fileInputWrapper" style="display:none;">
+  <input type="file" id="imageFile" accept="image/*" />
+</div>
+
+<button id="b1" onclick="generateVideo()">1. Generate video</button>
+<div class="output" id="output1"></div>
+
+<h2>② 查詢 generation 狀態</h2>
+<button id="b2" onclick="queryVideo()">2. check status</button>
+<div class="output" id="output2"></div>
+
+<hr/>
+
+<h2>🔑 Authorization Token</h2>
+<input type="text" id="authToken" placeholder="請輸入 Authorization Token" />
+<button onclick="saveAuth()">儲存 Token</button>
+
+
+<script>
+    // 儲存 Authorization 到 Cookie
+    function saveAuth() {
+        const token = document.getElementById('authToken').value;
+        document.cookie = `authToken=${encodeURIComponent(token)}; path=/; max-age=31536000`; // 保存一年
+        alert('已儲存 Token');
+    }
+
+    // 讀取 Cookie 裡的 Authorization
+    function getAuth() {
+        const match = document.cookie.match(/(?:^|; )authToken=([^;]*)/);
+        return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    function saveTask() {
+        document.cookie = `task_id=${encodeURIComponent(task_id)}; path=/; max-age=31536000`; // 保存一年
+        //alert('已儲存 task_id');
+    }
+
+    // 讀取 Cookie 裡的 Authorization
+    function getTask() {
+        const match = document.cookie.match(/(?:^|; )task_id=([^;]*)/);
+        return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    function saveFile() {
+        document.cookie = `file_id=${encodeURIComponent(file_id)}; path=/; max-age=31536000`; // 保存一年
+        //alert('已儲存 file_id');
+    }
+
+    // 讀取 Cookie 裡的 Authorization
+    function getFile() {
+        const match = document.cookie.match(/(?:^|; )file_id=([^;]*)/);
+        return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    function toggleImageInput() {
+        const mode = document.querySelector('input[name="imgMode"]:checked').value;
+
+        document.getElementById('urlInputWrapper').style.display = mode === 'url' ? 'block' : 'none';
+        document.getElementById('fileInputWrapper').style.display = mode === 'file' ? 'block' : 'none';
+    }
+
+    function getImageInput() {
+        const mode = document.querySelector('input[name="imgMode"]:checked').value;
+
+        if (mode === 'url') {
+            return document.getElementById('imageInput').value.trim();
+        }
+
+        const fileInput = document.getElementById('imageFile');
+        const file = fileInput.files[0];
+        if (!file) return '';
+
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result); // reader.result 是 base64
+            reader.onerror = reject;
+            reader.readAsDataURL(file); // output: data:image/jpeg;base64,...
+        });
+    }
+    // 共用變數
+    let task_id = '';
+    let file_id = '';
+
+    async function generateVideo() {
+        const auth = getAuth();
+        if (!auth) { alert('請先儲存 Authorization Token'); return; }
+
+        const template_id = document.getElementById('templateIdInput').value;
+        const text_input_1 = document.getElementById('textInput1').value.trim();
+
+        const img = await getImageInput();
+        if (!img) {
+            alert('請選擇圖片');
+            return;
+        }
+
+        document.getElementById('b1').style.backgroundColor = '#999999';
+        document.getElementById('output1').innerHTML = 'sending...';
+        const res = await fetch('https://api.minimaxi.com/v1/video_template_generation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer '+auth
+            },
+            body: JSON.stringify({
+                "template_id": template_id,
+                "media_inputs": [ { "value": img } ],
+                "text_inputs": [ { "value": text_input_1 } ]
+            })
+        });
+        document.getElementById('b1').style.backgroundColor = '#4CAF50';
+        const data = await res.json();
+        task_id = data.task_id || '';
+        if(task_id.length > 0)
+        {
+            saveTask();
+        }
+        document.getElementById('output1').innerHTML = `
+            status: ${data.base_resp?.status_msg} <br/>
+            task_id: ${task_id}
+        `;
+    }
+
+    async function queryVideo() {
+        const auth = getAuth();
+        if (!auth) { alert('請先儲存 Authorization Token'); return; }
+        task_id = getTask();
+        if (!task_id) { alert('請先送出 video_generation 取得 task_id'); return; }
+
+        const url = `https://api.minimaxi.com/v1/query/video_template_generation?task_id=${task_id}`;
+
+        document.getElementById('b2').style.backgroundColor = '#999999';
+        document.getElementById('output2').innerHTML = 'sending...';
+        const res = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer '+auth
+            }
+        });
+        document.getElementById('b2').style.backgroundColor = '#4CAF50';
+        const data = await res.json();
+        file_id = data.file_id || '';
+        if(file_id.length > 0)
+        {
+            saveFile();
+        }
+        document.getElementById('output2').innerHTML = `
+            status: ${data.base_resp?.status_msg} <br/>
+            file_id: ${file_id} <br/>
+            status: ${data.status}
+        `;
+        if (data.status?.toLowerCase() === 'success') {
+            document.getElementById('output2').innerHTML = `
+            status: ${data.status} <br/>
+            download_here: <a href="${data.video_url}" target="_blank">link</a>
+        `;
+        }
+    }
+
+
+
+    // 初始化時自動讀取 cookie 裡的 token 填入 input
+    window.onload = () => {
+        toggleImageInput(); // 初始狀態顯示正確欄位
+        document.getElementById('authToken').value = getAuth();
+    };
+</script>
+
+</body>
+</html>
