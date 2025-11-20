@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Braille Demo - Capture & Paint</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #111;
+            color: #eee;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .top-bar {
+            width: 100%;
+            max-width: 480px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #222;
+            box-sizing: border-box;
+        }
+
+        .top-bar-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .badge {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: #333;
+            color: #ccc;
+        }
+
+        .controls {
+            width: 100%;
+            max-width: 480px;
+            padding: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            background: #1a1a1a;
+            border-bottom: 1px solid #333;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        button.primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        button.secondary {
+            background: #4b5563;
+            color: white;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #ccc;
+            margin-right: 8px;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            background: #000;
+            overflow: hidden;
+            /* Min height to avoid collapse */
+            min-height: 320px;
+        }
+
+        video,
+        canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Mode switching */
+        .mode-preview video {
+            display: block;
+        }
+
+        .mode-preview canvas {
+            display: none;
+        }
+
+        .mode-edit video {
+            display: none;
+        }
+
+        .mode-edit canvas {
+            display: block;
+        }
+
+        .result-panel {
+            width: 100%;
+            max-width: 480px;
+            padding: 12px;
+            background: #1b1b1b;
+            box-sizing: border-box;
+            border-top: 1px solid #333;
+        }
+
+        .result-title {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+
+        .result-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            min-height: 1.5em;
+        }
+
+        .hint {
+            font-size: 12px;
+            padding: 8px;
+            color: #999;
+            max-width: 480px;
+            text-align: center;
+        }
+
+        .log-panel {
+            width: 100%;
+            max-width: 480px;
+            padding: 8px;
+            background: #151515;
+            font-size: 11px;
+            color: #777;
+            box-sizing: border-box;
+            white-space: pre-wrap;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+    </style>
+    <!-- OpenCV.js -->
+    <script async src="https://docs.opencv.org/4.x/opencv.js"></script>
+</head>
+
+<body>
+    <div class="top-bar">
+        <div class="top-bar-title">Braille Recognizer</div>
+        <div class="badge" id="statusBadge">Loading OpenCV...</div>
+    </div>
+
+    <div class="controls">
+        <div class="checkbox-wrapper">
+            <input type="checkbox" id="chkDebug">
+            <label for="chkDebug">上傳圖片 (Debug)</label>
+        </div>
+        <!-- Hidden file input -->
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+
+        <button id="btnCapture" class="primary">拍照 (Capture)</button>
+        <button id="btnReset" class="secondary" style="display:none;">重拍 (Reset)</button>
+        <button id="btnAnalyze" class="primary" disabled style="display:none;">辨識 (Analyze)</button>
+    </div>
+
+    <div class="container mode-preview" id="cameraContainer">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="displayCanvas"></canvas>
+    </div>
+
+    <div class="hint" id="hintText">請對準點字，按下「拍照」。</div>
+
+    <div class="result-panel">
+        <div class="result-title">辨識結果</div>
+        <div class="result-text" id="resultText">...</div>
+    </div>
+
+    <div class="log-panel" id="logPanel"></div>
+
+    <script>
+        // ======= Braille Map (Partial) =======
+        const BRAILLE_MAP = {
+            // --- Initials ---
+            "100000": { type: "initial", value: "ㄅ" },
+            "110000": { type: "initial", value: "ㄆ" },
+            "100100": { type: "initial", value: "ㄇ" },
+            "110100": { type: "initial", value: "ㄈ" },
+            "101000": { type: "initial", value: "ㄉ" },
+            "111000": { type: "initial", value: "ㄊ" },
+            "101100": { type: "initial", value: "ㄋ" },
+            "111100": { type: "initial", value: "ㄌ" },
+            "100010": { type: "initial", value: "ㄍ" },
+            "110010": { type: "initial", value: "ㄎ" },
+            "100110": { type: "initial", value: "ㄏ" },
+            "101010": { type: "initial", value: "ㄐ" },
+            "111010": { type: "initial", value: "ㄑ" },
+            "010110": { type: "initial", value: "ㄒ" },
+            "100011": { type: "initial", value: "ㄓ" },
+            "110011": { type: "initial", value: "ㄔ" },
+            "100111": { type: "initial", value: "ㄕ" },
+            "010111": { type: "initial", value: "ㄖ" },
+            "101011": { type: "initial", value: "ㄗ" },
+            "111011": { type: "initial", value: "ㄘ" },
+            "101111": { type: "initial", value: "ㄙ" },
+
+            // --- Finals ---
+            "010000": { type: "final", value: "ㄚ" },
+            "010010": { type: "final", value: "ㄛ" },
+            "011010": { type: "final", value: "ㄜ" },
+            "001110": { type: "final", value: "ㄝ" },
+            "010100": { type: "final", value: "ㄞ" },
+            "011100": { type: "final", value: "ㄟ" },
+            "010001": { type: "final", value: "ㄠ" },
+            "011001": { type: "final", value: "ㄡ" },
+            "010101": { type: "final", value: "ㄢ" },
+            "011101": { type: "final", value: "ㄣ" },
+            "010011": { type: "final", value: "ㄤ" },
+            "011011": { type: "final", value: "ㄥ" },
+            "001001": { type: "final", value: "ㄦ" },
+            "011000": { type: "final", value: "ㄧ" },
+            "001100": { type: "final", value: "ㄨ" },
+            "000110": { type: "final", value: "ㄩ" },
+
+            // --- Tones ---
+            "000000": { type: "tone", value: " " },     // Tone 1
+            "000010": { type: "tone", value: "ˊ" },    // Tone 2
+            "001000": { type: "tone", value: "ˇ" },    // Tone 3
+            "000011": { type: "tone", value: "ˋ" },    // Tone 4
+            "000001": { type: "tone", value: "˙" },    // Neutral
+        }
+
+        // ======= Globals =======
+        const video = document.getElementById("video")
+        const canvas = document.getElementById("displayCanvas")
+        const ctx = canvas.getContext("2d")
+
+        const maskCanvas = document.createElement("canvas")
+        const maskCtx = maskCanvas.getContext("2d")
+
+        const container = document.getElementById("cameraContainer")
+        const btnCapture = document.getElementById("btnCapture")
+        const btnReset = document.getElementById("btnReset")
+        const btnAnalyze = document.getElementById("btnAnalyze")
+        const chkDebug = document.getElementById("chkDebug")
+        const fileInput = document.getElementById("fileInput")
+        const hintText = document.getElementById("hintText")
+        const resultTextEl = document.getElementById("resultText")
+        const statusBadge = document.getElementById("statusBadge")
+
+        let opencvReady = false
+        let isPainting = false
+        let lastPoint = null
+
+        function log(msg) {
+            const panel = document.getElementById("logPanel")
+            const time = new Date().toISOString().substr(11, 8)
+            panel.textContent += `[${time}] ${msg}\n`
+            panel.scrollTop = panel.scrollHeight
+            console.log(msg)
+        }
+
+        // ========= Mode Management =========
+        function setMode(mode) {
+            if (mode === "preview") {
+                container.className = "container mode-preview"
+                btnCapture.style.display = "inline-block"
+                btnReset.style.display = "none"
+                btnAnalyze.style.display = "none"
+                hintText.textContent = "請對準點字，按下「拍照」。"
+                resultTextEl.textContent = "..."
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+                // Try to resume video if paused
+                if (video.srcObject) video.play().catch(e => { })
+
+            } else if (mode === "edit") {
+                container.className = "container mode-edit"
+                btnCapture.style.display = "none"
+                btnReset.style.display = "inline-block"
+                btnAnalyze.style.display = "inline-block"
+                btnAnalyze.disabled = false
+                hintText.textContent = "請用手指/滑鼠塗抹出點字範圍，然後按「辨識」。"
+
+                // Pause video to save resources
+                video.pause()
+            }
+        }
+
+        // ========= Camera =========
+        async function initCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                log("Browser API not supported (HTTPS required?)")
+                alert("無法存取相機。請確認您使用的是 HTTPS 或 localhost，且瀏覽器支援 getUserMedia。")
+                return
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" },
+                    audio: false,
+                })
+                video.srcObject = stream
+                await video.play()
+                log("Camera started.")
+            } catch (err) {
+                log("Camera failed: " + err.message)
+                alert("相機啟動失敗: " + err.message)
+            }
+        }
+
+        // ========= Capture / Load =========
+        btnCapture.addEventListener("click", async () => {
+            if (chkDebug.checked) {
+                // Trigger file input
+                fileInput.click()
+            } else {
+                // Camera capture
+                if (video.readyState >= 2) {
+                    setupCanvas(video)
+                    setMode("edit")
+                } else {
+                    log("Camera not ready (readyState=" + video.readyState + ")")
+                    alert("相機尚未準備好，請稍候或檢查相機權限。")
+                }
+            }
+        })
+
+        // Handle File Upload
+        fileInput.addEventListener("change", (e) => {
+            if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0]
+                const reader = new FileReader()
+                reader.onload = (evt) => {
+                    const img = new Image()
+                    img.onload = () => {
+                        setupCanvas(img)
+                        setMode("edit")
+                    }
+                    img.src = evt.target.result
+                }
+                reader.readAsDataURL(file)
+            }
+        })
+
+        btnReset.addEventListener("click", () => {
+            setMode("preview")
+            // Clear file input so same file can be selected again if needed
+            fileInput.value = ""
+        })
+
+        // ========= Canvas Setup =========
+        function setupCanvas(source) {
+            // Determine dimensions
+            let w, h
+            if (source.tagName === "VIDEO") {
+                w = source.videoWidth
+                h = source.videoHeight
+            } else {
+                w = source.width
+                h = source.height
+            }
+
+            if (!w || !h) {
+                log("Invalid source dimensions")
+                return
+            }
+
+            canvas.width = w
+            canvas.height = h
+            ctx.drawImage(source, 0, 0, w, h)
+
+            maskCanvas.width = w
+            maskCanvas.height = h
+            maskCtx.fillStyle = "black"
+            maskCtx.fillRect(0, 0, w, h)
+
+            log(`Canvas setup: ${w}x${h}`)
+        }
+
+        // ========= Painting =========
+        function getPos(evt) {
+            const rect = canvas.getBoundingClientRect()
+            const scaleX = canvas.width / rect.width
+            const scaleY = canvas.height / rect.height
+
+            const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX
+            const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY
+
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            }
+        }
+
+        function startPaint(evt) {
+            if (container.classList.contains("mode-preview")) return
+            isPainting = true
+            lastPoint = getPos(evt)
+            evt.preventDefault()
+        }
+
+        function movePaint(evt) {
+            if (!isPainting) return
+            const newPoint = getPos(evt)
+
+            // Draw on display canvas (Yellow transparent)
+            ctx.beginPath()
+            ctx.strokeStyle = "rgba(255, 255, 0, 0.4)"
+            ctx.lineWidth = 40
+            ctx.lineCap = "round"
+            ctx.lineJoin = "round"
+            ctx.moveTo(lastPoint.x, lastPoint.y)
+            ctx.lineTo(newPoint.x, newPoint.y)
+            ctx.stroke()
+
+            // Draw on mask canvas (White solid)
+            maskCtx.beginPath()
+            maskCtx.strokeStyle = "white"
+            maskCtx.lineWidth = 40
+            maskCtx.lineCap = "round"
+            maskCtx.lineJoin = "round"
+            maskCtx.moveTo(lastPoint.x, lastPoint.y)
+            maskCtx.lineTo(newPoint.x, newPoint.y)
+            maskCtx.stroke()
+
+            lastPoint = newPoint
+            evt.preventDefault()
+        }
+
+        function endPaint(evt) {
+            isPainting = false
+            if (evt.cancelable) evt.preventDefault()
+        }
+
+        canvas.addEventListener("mousedown", startPaint)
+        canvas.addEventListener("mousemove", movePaint)
+        window.addEventListener("mouseup", endPaint)
+
+        canvas.addEventListener("touchstart", startPaint, { passive: false })
+        canvas.addEventListener("touchmove", movePaint, { passive: false })
+        window.addEventListener("touchend", endPaint)
+
+        // ========= Analysis =========
+        btnAnalyze.addEventListener("click", () => {
+            if (!opencvReady) {
+                alert("OpenCV not ready")
+                return
+            }
+
+            log("Analyzing...")
+
+            try {
+                const src = cv.imread(canvas)
+                const mask = cv.imread(maskCanvas)
+                const maskGray = new cv.Mat()
+                cv.cvtColor(mask, maskGray, cv.COLOR_RGBA2GRAY)
+
+                const gray = new cv.Mat()
+                cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY)
+
+                const bin = new cv.Mat()
+                // Invert because dots are shadow/dark? Or light?
+                // Usually braille on paper: dots are shadows (darker) if light is from top.
+                // But here we use OTSU. Let's assume dots are different from background.
+                // If dots are dark on light paper -> THRESH_BINARY_INV
+                cv.threshold(gray, bin, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
+
+                const maskedBin = new cv.Mat()
+                cv.bitwise_and(bin, bin, maskedBin, maskGray)
+
+                const dots = detectDots(maskedBin)
+                log(`Detected ${dots.length} dots`)
+
+                if (dots.length === 0) {
+                    resultTextEl.textContent = "No dots found."
+                } else {
+                    // Visualize dots
+                    dots.forEach(dot => {
+                        ctx.beginPath()
+                        ctx.strokeStyle = "lime"
+                        ctx.lineWidth = 2
+                        ctx.arc(dot.x, dot.y, dot.r, 0, Math.PI * 2)
+                        ctx.stroke()
+                    })
+
+                    const cells = simpleCluster(dots)
+                    const patterns = cells.map(c => buildPattern(c))
+                    const text = parseBrailleSequence(patterns)
+
+                    resultTextEl.textContent = text
+                    log("Result: " + text)
+                }
+
+                src.delete(); mask.delete(); maskGray.delete();
+                gray.delete(); bin.delete(); maskedBin.delete();
+
+            } catch (err) {
+                console.error(err)
+                log("Error: " + err.message)
+            }
+        })
+
+        function detectDots(binMat) {
+            let contours = new cv.MatVector()
+            let hierarchy = new cv.Mat()
+            cv.findContours(binMat, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+
+            const dots = []
+            for (let i = 0; i < contours.size(); i++) {
+                const cnt = contours.get(i)
+                const area = cv.contourArea(cnt)
+                if (area > 5 && area < 5000) {
+                    const circle = cv.minEnclosingCircle(cnt)
+                    const circleArea = Math.PI * circle.radius * circle.radius
+                    // Circularity check
+                    if (area / circleArea > 0.4) {
+                        dots.push({
+                            x: circle.center.x,
+                            y: circle.center.y,
+                            r: circle.radius
+                        })
+                    }
+                }
+            }
+            contours.delete(); hierarchy.delete();
+            return dots
+        }
+
+        function simpleCluster(dots) {
+            if (dots.length === 0) return []
+
+            // Sort by X
+            dots.sort((a, b) => a.x - b.x)
+
+            const cells = []
+            let currentCell = []
+            let lastX = dots[0].x
+
+            // Heuristic gap threshold
+            const avgR = dots.reduce((s, d) => s + d.r, 0) / dots.length
+            const gapThreshold = avgR * 3.5
+
+            dots.forEach(dot => {
+                if (dot.x - lastX > gapThreshold && currentCell.length > 0) {
+                    cells.push(currentCell)
+                    currentCell = []
+                }
+                currentCell.push(dot)
+                lastX = dot.x
+            })
+            if (currentCell.length > 0) cells.push(currentCell)
+
+            return cells
+        }
+
+        function buildPattern(cellDots) {
+            if (cellDots.length === 0) return "000000"
+
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+            cellDots.forEach(d => {
+                if (d.x < minX) minX = d.x
+                if (d.x > maxX) maxX = d.x
+                if (d.y < minY) minY = d.y
+                if (d.y > maxY) maxY = d.y
+            })
+
+            const w = maxX - minX
+            const h = maxY - minY
+
+            const safeW = Math.max(w, 20)
+            const safeH = Math.max(h, 30)
+
+            const bits = [0, 0, 0, 0, 0, 0]
+
+            cellDots.forEach(dot => {
+                const nx = (dot.x - minX) / (safeW / 2)
+                const ny = (dot.y - minY) / (safeH / 3)
+
+                let c = Math.floor(nx)
+                let r = Math.floor(ny)
+
+                if (c > 1) c = 1
+                if (r > 2) r = 2
+
+                const idx = c * 3 + r
+                bits[idx] = 1
+            })
+
+            return bits.join("")
+        }
+
+        function parseBrailleSequence(patterns) {
+            let result = ""
+            let buffer = { initial: null, final: null, tone: null }
+
+            for (let p of patterns) {
+                const mapped = BRAILLE_MAP[p]
+                if (!mapped) {
+                    if (buffer.initial || buffer.final) {
+                        result += combineZhuyin(buffer)
+                        buffer = { initial: null, final: null, tone: null }
+                    }
+                    result += "?"
+                    continue
+                }
+
+                if (mapped.type === "initial") {
+                    if (buffer.initial || buffer.final) {
+                        result += combineZhuyin(buffer)
+                        buffer = { initial: null, final: null, tone: null }
+                    }
+                    buffer.initial = mapped.value
+                } else if (mapped.type === "final") {
+                    if (buffer.final) {
+                        result += combineZhuyin(buffer)
+                        buffer = { initial: null, final: null, tone: null }
+                    }
+                    buffer.final = mapped.value
+                } else if (mapped.type === "tone") {
+                    buffer.tone = mapped.value
+                    result += combineZhuyin(buffer)
+                    buffer = { initial: null, final: null, tone: null }
+                }
+            }
+            if (buffer.initial || buffer.final) {
+                result += combineZhuyin(buffer)
+            }
+            return result
+        }
+
+        function combineZhuyin(buf) {
+            let s = ""
+            if (buf.initial) s += buf.initial
+            if (buf.final) s += buf.final
+            if (buf.tone) s += buf.tone
+            return s
+        }
+
+        function waitForOpenCVReady() {
+            const check = () => {
+                if (typeof cv === "undefined") {
+                    setTimeout(check, 100)
+                    return
+                }
+                cv["onRuntimeInitialized"] = () => {
+                    opencvReady = true
+                    log("OpenCV Ready")
+                    statusBadge.textContent = "OpenCV Ready"
+                    statusBadge.style.background = "#059669"
+                    statusBadge.style.color = "white"
+                }
+            }
+            check()
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            initCamera()
+            waitForOpenCVReady()
+            setMode("preview")
+        })
+    </script>
+</body>
+
+</html>
