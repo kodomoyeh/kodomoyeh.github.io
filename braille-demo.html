@@ -533,61 +533,79 @@
 
 
         function drawDebugDotsOnCanvas(dots) {
-            // 這裡用的是顯示用的 canvas（displayCanvas）
-            // 如果你有額外 overlay canvas 也可以改成 overlay 的 context
-            const ctx = canvas.getContext('2d')
-            if (!ctx) return
+               const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
-            ctx.save()
-            // 不清畫面，純疊在原圖上：如果你想每次重畫，可以先 clearRect
-            // ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.save()
+    ctx.lineWidth = 2
+    ctx.strokeStyle = 'rgba(0, 255, 0, 0.9)'
+    ctx.fillStyle = 'rgba(0, 255, 0, 0.7)'
 
-            ctx.lineWidth = 2
-            ctx.strokeStyle = 'rgba(0, 255, 0, 0.9)'   // 綠色圈圈
-            ctx.fillStyle = 'rgba(0, 255, 0, 0.7)'     // 綠色實心點
+    dots.forEach(d => {
+        const r = d.r || 8
 
-            dots.forEach(d => {
-                const r = d.r || 6  // 如果 detectDots 有回傳半徑就用，沒有就給一個固定半徑
+        ctx.beginPath()
+        ctx.arc(d.x, d.y, r, 0, Math.PI * 2)
+        ctx.stroke()
 
-                // 外圈
-                ctx.beginPath()
-                ctx.arc(d.x, d.y, r, 0, Math.PI * 2)
-                ctx.stroke()
+        ctx.beginPath()
+        ctx.arc(d.x, d.y, Math.max(2, r * 0.3), 0, Math.PI * 2)
+        ctx.fill()
+    })
 
-                // 中心小點
-                ctx.beginPath()
-                ctx.arc(d.x, d.y, Math.max(2, r * 0.3), 0, Math.PI * 2)
-                ctx.fill()
-            })
-
-            ctx.restore()
+    ctx.restore()
         }
 
         function detectDots(binMat) {
-            let contours = new cv.MatVector()
-            let hierarchy = new cv.Mat()
-            cv.findContours(binMat, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    // 1. 先把輸入的二值圖反相：
+    //    如果原本是黑點白底，就變成白點黑底，方便 findContours 抓外框。
+    let work = new cv.Mat()
+    cv.bitwise_not(binMat, work)
 
-            const dots = []
-            for (let i = 0; i < contours.size(); i++) {
-                const cnt = contours.get(i)
-                const area = cv.contourArea(cnt)
-                if (area > 0 && area < 1000) {
-                    const circle = cv.minEnclosingCircle(cnt)
-                    const circleArea = Math.PI * circle.radius * circle.radius
-                    // Circularity check
-                    if (area / circleArea > 0.4) {
-                        dots.push({
-                            x: circle.center.x,
-                            y: circle.center.y,
-                            r: circle.radius
-                        })
-                    }
-                }
+    let contours = new cv.MatVector()
+    let hierarchy = new cv.Mat()
+
+    cv.findContours(
+        work,
+        contours,
+        hierarchy,
+        cv.RETR_EXTERNAL,
+        cv.CHAIN_APPROX_SIMPLE
+    )
+
+    const dots = []
+    for (let i = 0; i < contours.size(); i++) {
+        const cnt = contours.get(i)
+        const area = cv.contourArea(cnt)
+
+        // 實際實拍圖測過，一顆半球小點大概幾十～幾百 px 面積
+        // 這裡先抓一個比較寬鬆的範圍
+        if (area > 20 && area < 10000) {
+            const circle = cv.minEnclosingCircle(cnt)
+            const circleArea = Math.PI * circle.radius * circle.radius
+
+            if (circleArea <= 0) continue
+
+            const circularity = area / circleArea
+
+            // 半球狀 + 光影的關係，輪廓不會是完美圓，0.3～0.9 都算合理
+            if (circularity > 0.3) {
+                dots.push({
+                    x: circle.center.x,
+                    y: circle.center.y,
+                    r: circle.radius
+                })
             }
-            contours.delete(); hierarchy.delete();
-            return dots
         }
+    }
+
+    contours.delete()
+    hierarchy.delete()
+    work.delete()
+
+    return dots
+}
+
 
         function simpleCluster(dots) {
             if (dots.length === 0) return []
