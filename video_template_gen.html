@@ -132,25 +132,23 @@ body {
     }
 
     function saveTask() {
-        document.cookie = `task_id=${encodeURIComponent(task_id)}; path=/; max-age=31536000`; // 保存一年
+        sessionStorage.setItem('task_id', task_id);
         //alert('已儲存 task_id');
     }
 
-    // 讀取 Cookie 裡的 Authorization
+    // 讀取 sessionStorage 裡的 task_id
     function getTask() {
-        const match = document.cookie.match(/(?:^|; )task_id=([^;]*)/);
-        return match ? decodeURIComponent(match[1]) : '';
+        return sessionStorage.getItem('task_id') || '';
     }
 
     function saveFile() {
-        document.cookie = `file_id=${encodeURIComponent(file_id)}; path=/; max-age=31536000`; // 保存一年
+        sessionStorage.setItem('file_id', file_id);
         //alert('已儲存 file_id');
     }
 
-    // 讀取 Cookie 裡的 Authorization
+    // 讀取 sessionStorage 裡的 file_id
     function getFile() {
-        const match = document.cookie.match(/(?:^|; )file_id=([^;]*)/);
-        return match ? decodeURIComponent(match[1]) : '';
+        return sessionStorage.getItem('file_id') || '';
     }
 
     function toggleImageInput() {
