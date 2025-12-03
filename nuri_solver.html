@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nurimisaki Solver - OCR</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 16px; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    label { font-weight: bold; margin-right: 4px; }
+    input[type="number"] { width: 80px; }
+    #canvases { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; margin-top: 12px; }
+    canvas { width: 100%; border: 1px solid #ccc; }
+    #status { margin-top: 8px; color: #555; }
+    textarea { width: 100%; min-height: 140px; margin-top: 8px; font-family: monospace; }
+    button { padding: 6px 10px; }
+  </style>
+  <script src="https://docs.opencv.org/4.x/opencv.js" defer></script>
+  <script src="https://unpkg.com/tesseract.js@4.1.1/dist/tesseract.min.js" defer></script>
+</head>
+<body>
+  <h1>Nurimisaki Solver OCR</h1>
+  <div class="row">
+    <label for="fileInput">Upload:</label>
+    <input type="file" id="fileInput" accept="image/*">
+    <label for="urlInput">or URL:</label>
+    <input type="text" id="urlInput" placeholder="Paste image URL" size="40">
+    <button id="loadUrl">Load URL</button>
+  </div>
+  <div class="row" style="margin-top:8px;">
+    <label for="rowsInput">Rows</label>
+    <input type="number" id="rowsInput" value="10" min="1">
+    <label for="colsInput">Cols</label>
+    <input type="number" id="colsInput" value="10" min="1">
+    <button id="recognizeBtn">Recognize Cells</button>
+  </div>
+  <div id="status">Load an image to begin.</div>
+  <div id="canvases">
+    <div>
+      <p>Original</p>
+      <canvas id="orig" width="800" height="800"></canvas>
+    </div>
+    <div>
+      <p>Warped</p>
+      <canvas id="warp" width="800" height="800"></canvas>
+    </div>
+    <div>
+      <p>Threshold</p>
+      <canvas id="thresh" width="800" height="800"></canvas>
+    </div>
+  </div>
+  <label for="resultArea" style="display:block;margin-top:12px;">Cell results (rows separated by new lines):</label>
+  <textarea id="resultArea" placeholder="Run recognition to fill this area..."></textarea>
+
+<script>
+(function() {
+  const orig = document.getElementById('orig');
+  const warp = document.getElementById('warp');
+  const thresh = document.getElementById('thresh');
+  const statusEl = document.getElementById('status');
+  const resultArea = document.getElementById('resultArea');
+  const rowsInput = document.getElementById('rowsInput');
+  const colsInput = document.getElementById('colsInput');
+  const recognizeBtn = document.getElementById('recognizeBtn');
+
+  let lastWarpedReady = false;
+  let worker = null;
+
+  const setStatus = (msg) => statusEl.textContent = msg;
+
+  const loadImage = (src) => new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Cannot load image'));
+    img.src = src;
+  });
+
+  const drawImageToCanvas = (img, canvas) => {
+    const ctx = canvas.getContext('2d');
+    const scale = Math.min(canvas.width / img.width, canvas.height / img.height);
+    const w = img.width * scale;
+    const h = img.height * scale;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, w, h);
+  };
+
+  async function ensureWorker() {
+    if (worker) return worker;
+    worker = await Tesseract.createWorker('eng');
+    await worker.setParameters({ tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.' });
+    return worker;
+  }
+
+  async function handleImage(img) {
+    setStatus('Processing image...');
+    drawImageToCanvas(img, orig);
+
+    await cv['onRuntimeInitialized'];
+    const src = cv.imread(orig);
+    const gray = new cv.Mat();
+    cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+    const blur = new cv.Mat();
+    cv.GaussianBlur(gray, blur, new cv.Size(5, 5), 0);
+    const binary = new cv.Mat();
+    cv.adaptiveThreshold(blur, binary, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY_INV, 35, 10);
+
+    // find largest contour (puzzle boundary)
+    const contours = new cv.MatVector();
+    const hierarchy = new cv.Mat();
+    cv.findContours(binary, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    let maxArea = 0, maxCnt = null;
+    for (let i = 0; i < contours.size(); i++) {
+      const c = contours.get(i);
+      const area = cv.contourArea(c);
+      if (area > maxArea) { maxArea = area; maxCnt = c; }
+    }
+
+    const size = new cv.Size(800, 800);
+    let warpMat = cv.Mat.eye(3, 3, cv.CV_32F);
+    if (maxCnt) {
+      const peri = cv.arcLength(maxCnt, true);
+      const approx = new cv.Mat();
+      cv.approxPolyDP(maxCnt, approx, 0.02 * peri, true);
+      if (approx.rows === 4) {
+        const pts = [];
+        for (let i = 0; i < 4; i++) pts.push({ x: approx.intAt(i, 0), y: approx.intAt(i, 1) });
+        pts.sort((a, b) => a.x + a.y - (b.x + b.y));
+        const tl = pts[0], br = pts[3];
+        const tr = pts[1].x > pts[2].x ? pts[1] : pts[2];
+        const bl = pts[1].x > pts[2].x ? pts[2] : pts[1];
+        const srcTri = cv.matFromArray(4, 1, cv.CV_32FC2, [tl.x, tl.y, tr.x, tr.y, br.x, br.y, bl.x, bl.y]);
+        const dstTri = cv.matFromArray(4, 1, cv.CV_32FC2, [0, 0, size.width, 0, size.width, size.height, 0, size.height]);
+        warpMat = cv.getPerspectiveTransform(srcTri, dstTri);
+      }
+    }
+
+    const warped = new cv.Mat();
+    cv.warpPerspective(gray, warped, warpMat, size, cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
+    cv.imshow(warp, warped);
+
+    const bw = new cv.Mat();
+    cv.adaptiveThreshold(warped, bw, 255, cv.ADAPTIVE_THRESH_MEAN_C, cv.THRESH_BINARY_INV, 31, 8);
+    cv.imshow(thresh, bw);
+
+    lastWarpedReady = true;
+    setStatus('Image ready. Set rows/cols then click Recognize Cells.');
+
+    [src, gray, blur, binary, contours, hierarchy, warped, bw].forEach(m => m && m.delete && m.delete());
+  }
+
+  function splitCellsFromCanvas(canvas, rows, cols) {
+    const cells = [];
+    const w = canvas.width;
+    const h = canvas.height;
+    const cellW = w / cols;
+    const cellH = h / rows;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const tmp = document.createElement('canvas');
+        tmp.width = Math.ceil(cellW);
+        tmp.height = Math.ceil(cellH);
+        const ctx = tmp.getContext('2d');
+        ctx.drawImage(canvas, c * cellW, r * cellH, cellW, cellH, 0, 0, tmp.width, tmp.height);
+        cells.push({ r, c, canvas: tmp });
+      }
+    }
+    return cells;
+  }
+
+  async function recognizeCells() {
+    if (!lastWarpedReady) {
+      setStatus('Load and process an image first.');
+      return;
+    }
+    const rows = parseInt(rowsInput.value, 10) || 0;
+    const cols = parseInt(colsInput.value, 10) || 0;
+    if (rows <= 0 || cols <= 0) {
+      setStatus('Rows and cols must be > 0.');
+      return;
+    }
+
+    recognizeBtn.disabled = true;
+    setStatus('Running OCR on cells...');
+    resultArea.value = '';
+
+    const cells = splitCellsFromCanvas(thresh, rows, cols);
+    const w = await ensureWorker();
+    const lines = Array.from({ length: rows }, () => []);
+
+    for (const cell of cells) {
+      const { data: { text } } = await w.recognize(cell.canvas);
+      const cleaned = (text || '').trim().replace(/\s+/g, '') || '.';
+      lines[cell.r].push(cleaned);
+    }
+
+    resultArea.value = lines.map(row => row.join(' ')).join('\n');
+    setStatus('Recognition complete.');
+    recognizeBtn.disabled = false;
+  }
+
+  document.getElementById('fileInput').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    loadImage(url).then(handleImage).catch(err => setStatus(err.message));
+  });
+
+  document.getElementById('loadUrl').addEventListener('click', () => {
+    const url = document.getElementById('urlInput').value.trim();
+    if (!url) return;
+    loadImage(url).then(handleImage).catch(err => setStatus(err.message));
+  });
+
+  recognizeBtn.addEventListener('click', () => recognizeCells());
+})();
+</script>
+</body>
+</html>
