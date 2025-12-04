@@ -85,6 +85,7 @@
       <canvas id="solution" width="400" height="400"></canvas>
     </div>
   </div>
+  <span id="apad"></span>
   <p>Debug:</p>
   <div id="debugArea">Waiting for run...</div>
 
@@ -99,7 +100,7 @@
       let worker = null;
       let gridLines = null;
       let pzprPuzzle = null;
-      let gridText = '';
+      let grid = [];;
 
       const setStatus = (msg) => statusEl.textContent = msg;
 
@@ -373,6 +374,12 @@
         const cellWidth = dashVertical.length > 1 ? dashVertical[1] - dashVertical[0] : null;
         const cellHeight = dashHorizontal.length > 1 ? dashHorizontal[1] - dashHorizontal[0] : null;
 
+        const rows = dashHorizontal.length > 1 ? dashHorizontal.length + 1 : null;
+        const cols = dashVertical.length > 1 ? dashVertical.length + 1 : null;
+        //init grid as cellWidth x cellHeight array ;
+        grid = Array(rows).fill(null).map(() => Array(cols).fill('.'));
+
+        
         //for each numberedCircles, calculate cell position
         numberedCircles.forEach((c, i, arr) => {
           if (cellWidth && cellHeight) {
@@ -380,6 +387,7 @@
             const row = Math.floor((c.cy ) / cellHeight);
             //delete all attribute in c
             c.cell = {  col,row };
+            grid[row][col] = -1;
             arr[i] = {
                 tag: c.tag,
                 cell: { col, row },
@@ -396,7 +404,7 @@
             if (cellWidth && cellHeight) {
                 const col = Math.floor((t.x ) / cellWidth);
                 const row = Math.floor((t.y ) / cellHeight);
-                
+                grid[row][col] = t.content;
                 arr[i] = {
                     tag: t.tag,
                     text: t.content,
@@ -417,12 +425,14 @@
             vertical: dashVertical.sort((a, b) => a - b),
             horizontal: dashHorizontal.sort((a, b) => a - b)
           },*/
-          rows: dashHorizontal.length > 1 ? dashHorizontal.length + 1 : null,
-          cols: dashVertical.length > 1 ? dashVertical.length + 1 : null,
+          rows: rows,
+          cols: cols,
           //pathsCount: paths.length
         };
 
-        debugArea.textContent = JSON.stringify(analysis, null, 2);
+        debugArea.textContent += JSON.stringify(analysis, null, 2);
+        const text = grid.map(row => row.join('')).join('\r\n');
+        debugArea.textContent += text;
       }
 
       document.getElementById('loadUrl').addEventListener('click', () => {
@@ -441,36 +451,41 @@
 
       solveBtn.addEventListener('click', () => {
         // Solver logic (requires grid data in gridText)
-        const text = gridText;
-        const lines = text.trim().split('\n').filter(l => l.trim().length > 0);
-        const rows = lines.length;
-        const cols = lines.reduce((m, line) => Math.max(m, line.trim().split(/\s+/).length), 0);
-        if (!text || rows === 0 || cols === 0) {
-          setStatus('No grid data to solve.');
-          return;
-        }
-        // ... (Existing solver logic)
-        // For brevity, we assume the user will populate gridText manually or via OCR (if fixed)
-        // or we could extract from SVG analysis in the future.
-
-        // Re-implement basic parsing for demo
-        const grid = [];
-        for (let r = 0; r < rows; r++) {
-          const rowVals = (lines[r] || '').trim().split(/\s+/);
-          const row = [];
-          for (let c = 0; c < cols; c++) {
-            const val = rowVals[c] || '.';
-            let type = 'empty';
-            let num = null;
-            if (val.match(/^[1-9][0-9]*$/)) { type = 'number'; num = parseInt(val, 10); }
-            else if (['o', 'O', '0', 'Q', '@'].includes(val)) { type = 'circle'; }
-            row.push({ type, num, r, c });
-          }
-          grid.push(row);
-        }
+        const rows = grid.length;
+        const cols = grid[0].length;
         setStatus('Solving...');
         setTimeout(() => runCSP(grid, rows, cols), 50);
       });
+
+        function visualize(assigned) {
+
+			console.log("vis->" + JSON.stringify(assigned));
+	        const ROW_SIZE = grid.length;
+            const COL_SIZE = grid[0].length;
+
+			//$("#drawbase").html($("#drawbase").html());
+				var text = '', divider = '';
+				for (var i = 0; i < COL_SIZE * 6 + 1; i++) { divider += '-'; }
+				text += divider + '<br/>'
+			for (var i = 0; i < ROW_SIZE; i++) {
+				for (var j = 0; j < COL_SIZE; j++) {
+					text += '|';
+					var mid = grid[i][j];
+				if(mid==".")
+					text += '&nbsp; ' + '?' + ' &nbsp;';
+				else if(mid==-1)
+					text += '&nbsp; ' + 'O' + ' &nbsp;';
+				else
+					text += '&nbsp; ' + mid + ' &nbsp;';
+				}
+				text += '|<br/>' + divider + '<br/>'
+			}
+            var apad = document.getElementById('apad');
+			  apad.innerHTML = text;
+			   return text;
+		}
+
+
 
       function runCSP(grid, rows, cols) {
         // ... (Existing CSP logic, assumed to be in scope or we need to copy it back if we replaced the whole file)
@@ -481,15 +496,18 @@
         const constraints = [];
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
-            const cell = grid[r][c];
-            if (cell.type === 'number' || cell.type === 'circle') variables[`${r},${c}`] = [1];
-            else variables[`${r},${c}`] = [0, 1];
+            const cell = grid[c][r];
+            //if (cell.type === 'number' || cell.type === 'circle') variables[`${r},${c}`] = [1];
+            if (cell > 0 || cell === -1) variables[`${c},${r}`] = [1];
+            else variables[`${c},${r}`] = [0, 1];
           }
         }
         const problem = {
           variables, constraints,
           validate: (assigned, unassigned) => validateNuri(assigned, unassigned, grid, rows, cols)
         };
+        problem.cb=visualize
+        problem.timeStep = 250;
         try {
           const result = csp.solve(problem);
           if (result === 'FAILURE') {
@@ -497,8 +515,9 @@
             debugArea.textContent = 'No solution found.';
           } else {
             setStatus('Solved!');
+            debugArea.textContent = '\n\nSolution:\n' + JSON.stringify(result, null, 2);
             drawSolution(result, grid, rows, cols);
-            debugArea.textContent += '\n\nSolution:\n' + JSON.stringify(result, null, 2);
+            
           }
         } catch (e) {
           setStatus('Error: ' + e.message);
@@ -540,14 +559,15 @@
               if (nv === 1) white++;
               if (nv === null) pot++;
             }
-            if (cell.type === 'circle' || cell.type === 'number') {
+//            if (cell === 'circle' || cell.type === 'number') {
+            if (cell == -1 || cell > 0) {
               if (white > 1) return false;
               if (white + pot < 1) return false;
               if (pot === 0 && white !== 1) return false;
             } else {
               if (white + pot < 2) return false;
             }
-            if (cell.type === 'number' && white === 1) {
+            if (cell > 0 && white === 1) {
               // Number logic (simplified for length)
               // ... (Full logic needed)
               // I will paste the full logic in the actual tool call.
