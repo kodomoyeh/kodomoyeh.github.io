@@ -27,6 +27,10 @@
       width: 80px;
     }
 
+    .svgblock {
+      background-color : #000000;
+    }
+
     #canvases {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -66,7 +70,7 @@
   <h1>Nurimisaki Solver OCR / SVG</h1>
   <div class="row">
     <label for="urlInput">URL:</label>
-    <input type="text" id="urlInput" placeholder="Paste image or pzv.jp URL" size="60" value="http://pzv.jp/p.html?nurimisaki/10/10/r.i.h.k.l.l3i5m4h4j.h.i4j5w44k.i">
+    <input type="text" id="urlInput" placeholder="Paste image or pzv.jp URL" size="60" value="http://pzv.jp/p.html?nurimisaki/10/10/3g4zk.l.g.r2g5g3i.q.l.k.g.p3i">
     <button id="loadUrl">Load URL</button>
   </div>
   <div class="row" style="margin-top:8px;">
@@ -82,6 +86,7 @@
     </div>
     <div>
       <p>Solution</p>
+      <div id="pzpr-solution" style="width:400px; height:400px; border:1px solid #ccc; display:none; position:relative;"></div>
       <canvas id="solution" width="400" height="400"></canvas>
     </div>
   </div>
@@ -92,7 +97,10 @@
   <script>
     (function () {
       const orig = document.getElementById('orig');
+      const solution = document.getElementById('solution');
       const pzprDiv = document.getElementById('pzpr-div');
+      const pzprSolution = document.getElementById('pzpr-solution');
+      
       const statusEl = document.getElementById('status');
       const debugArea = document.getElementById('debugArea');
 
@@ -163,6 +171,10 @@
         orig.style.display = 'block';
         drawImageToCanvas(img, orig);
 
+        //handle solution
+        pzprSolution.style.display = 'none';
+        solution.style.display = 'block';
+        drawImageToCanvas(img, solution);
         // We can still do OpenCV processing if needed, but for now we just show the image.
         // If the user wants OCR on this image, we'd need to restore the pipeline.
         // Assuming "Original should show content" is the main goal for now.
@@ -173,6 +185,8 @@
         setStatus('Loading puzzle from URL...');
         pzprDiv.style.display = 'block';
         orig.style.display = 'none';
+        pzprSolution.style.display = 'block';
+        solution.style.display = 'none';
         pzprDiv.innerHTML = ''; // Clear previous
         debugArea.textContent += 'Starting load...\n';
 
@@ -203,6 +217,7 @@
           log('Opening puzzle with data: ' + data.substring(0, 50) + '...');
 
           const puzzle = new pzpr.Puzzle();
+          const puzzleSolution = new pzpr.Puzzle();
 
           const timeout = setTimeout(() => {
             setStatus('Error: Puzzle load timed out.');
@@ -222,6 +237,18 @@
             if (puzzle.cursor && puzzle.cursor.reset) puzzle.cursor.reset();
             puzzle.redraw();
             log('Redraw called.');
+
+            // Also load puzzle on solution div
+            puzzleSolution.open(data, () => {
+              log('Solution puzzle opened callback fired.');
+              puzzleSolution.setCanvas(pzprSolution);
+              puzzleSolution.setCanvasSize(pzprSolution.clientWidth, pzprSolution.clientHeight);
+              pzprSolution.style.pointerEvents = 'none';
+              if (puzzleSolution.setMode) puzzleSolution.setMode('play');
+              if (puzzleSolution.cursor && puzzleSolution.cursor.reset) puzzleSolution.cursor.reset();
+              puzzleSolution.redraw();
+              log('Solution div redraw called.');
+            });
 
             // Analyze SVG
             setTimeout(() => {
@@ -379,6 +406,26 @@
         //init grid as cellWidth x cellHeight array ;
         grid = Array(rows).fill(null).map(() => Array(cols).fill('.'));
 
+        //in #solution add div for every cell and set it as display:none
+        const solutionDiv = document.getElementById('pzpr-solution'); 
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const cellDiv = document.createElement('div');
+            cellDiv.id = `cell-${c}-${r}`;
+            cellDiv.className = 'svgblock';
+            cellDiv.style.display = 'none';
+            solutionDiv.appendChild(cellDiv);
+            //set it position absolute
+            cellDiv.style.position = 'absolute';
+            cellDiv.style.left = `${cellWidth*c +10}px`;
+            cellDiv.style.top = `${cellHeight*r +10}px`;
+            cellDiv.style.width = `${cellWidth || 40}px`;
+            cellDiv.style.height = `${cellHeight || 40}px`;
+          }
+        }
+          
+        
+
         
         //for each numberedCircles, calculate cell position
         numberedCircles.forEach((c, i, arr) => {
@@ -387,7 +434,7 @@
             const row = Math.floor((c.cy ) / cellHeight);
             //delete all attribute in c
             c.cell = {  col,row };
-            grid[row][col] = -1;
+            grid[col][row] = -1;
             arr[i] = {
                 tag: c.tag,
                 cell: { col, row },
@@ -404,7 +451,7 @@
             if (cellWidth && cellHeight) {
                 const col = Math.floor((t.x ) / cellWidth);
                 const row = Math.floor((t.y ) / cellHeight);
-                grid[row][col] = t.content;
+                grid[col][row] = t.content;
                 arr[i] = {
                     tag: t.tag,
                     text: t.content,
@@ -460,6 +507,39 @@
         function visualize(assigned) {
 
 			console.log("vis->" + JSON.stringify(assigned));
+
+      var appBanners = document.getElementsByClassName('svgblock');
+      for (var i = 0; i < appBanners.length; i ++) {
+        appBanners[i].style.display = 'none';
+      }//hide all first
+	
+			 
+			
+			for (const key in assigned) {
+			
+				var solution = assigned[key][0];
+				console.log("solution = "+solution);
+        //solution = c,r
+        var parts = key.split(',');
+				var x = parts[0];
+				var y = parts[1];
+				
+				
+				
+						
+				var svgblock = document.getElementById('cell-'+x+'-'+y);
+				//var svgblock = $("#apad-map").contents().find("#x3"+type+"_"+direction)
+				if (svgblock) {
+					//console.log("we got "+svgblock);
+          if(solution==1)
+            svgblock.style.display = 'none';
+          else
+					svgblock.style.display = '';
+				}
+
+			}
+
+
 	        const ROW_SIZE = grid.length;
             const COL_SIZE = grid[0].length;
 
@@ -470,7 +550,7 @@
 			for (var i = 0; i < ROW_SIZE; i++) {
 				for (var j = 0; j < COL_SIZE; j++) {
 					text += '|';
-					var mid = grid[i][j];
+					var mid = grid[j][i];
 				if(mid==".")
 					text += '&nbsp; ' + '?' + ' &nbsp;';
 				else if(mid==-1)
@@ -499,7 +579,7 @@
             const cell = grid[c][r];
             //if (cell.type === 'number' || cell.type === 'circle') variables[`${r},${c}`] = [1];
             if (cell > 0 || cell === -1) variables[`${c},${r}`] = [1];
-            else variables[`${c},${r}`] = [0, 1];
+            else variables[`${c},${r}`] = [0, 1]; //1 for white , 0 for black
           }
         }
         const problem = {
@@ -507,7 +587,7 @@
           validate: (assigned, unassigned) => validateNuri(assigned, unassigned, grid, rows, cols)
         };
         problem.cb=visualize
-        problem.timeStep = 250;
+        problem.timeStep = 50;
         try {
           const result = csp.solve(problem);
           if (result === 'FAILURE') {
@@ -532,14 +612,14 @@
 
         const getVal = (r, c) => {
           if (r < 0 || r >= rows || c < 0 || c >= cols) return 0;
-          const key = `${r},${c}`;
+          const key = `${c},${r}`;
           if (assigned[key] !== undefined) return assigned[key][0];
           return null;
         };
         // 1. Check 2x2
         for (let r = 0; r < rows - 1; r++) {
           for (let c = 0; c < cols - 1; c++) {
-            const v1 = getVal(r, c), v2 = getVal(r + 1, c), v3 = getVal(r, c + 1), v4 = getVal(r + 1, c + 1);
+            const v1 = getVal(c, r), v2 = getVal(c + 1, r), v3 = getVal(c, r + 1), v4 = getVal(c + 1, r + 1);
             if (v1 !== null && v2 !== null && v3 !== null && v4 !== null) {
               const sum = v1 + v2 + v3 + v4;
               if (sum === 0 || sum === 4) return false;
@@ -549,13 +629,13 @@
         // 2. Cell Constraints
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
-            const val = getVal(r, c);
+            const val = getVal(c, r);
             if (val === null || val === 0) continue;
-            const cell = grid[r][c];
-            const neighbors = [{ r: r - 1, c: c }, { r: r + 1, c: c }, { r: r, c: c - 1 }, { r: r, c: c + 1 }];
+            const cell = grid[c][r];
+            const neighbors = [{ c: c - 1, r: r }, { c: c + 1, r: r }, { c: c, r: r - 1 }, { c: c, r: r + 1 }];
             let white = 0, pot = 0;
             for (const n of neighbors) {
-              const nv = getVal(n.r, n.c);
+              const nv = getVal(n.c, n.r);
               if (nv === 1) white++;
               if (nv === null) pot++;
             }
