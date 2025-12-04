@@ -66,7 +66,7 @@
   <h1>Nurimisaki Solver OCR / SVG</h1>
   <div class="row">
     <label for="urlInput">URL:</label>
-    <input type="text" id="urlInput" placeholder="Paste image or pzv.jp URL" size="60">
+    <input type="text" id="urlInput" placeholder="Paste image or pzv.jp URL" size="60" value="http://pzv.jp/p.html?nurimisaki/10/10/r.i.h.k.l.l3i5m4h4j.h.i4j5w44k.i">
     <button id="loadUrl">Load URL</button>
   </div>
   <div class="row" style="margin-top:8px;">
@@ -173,7 +173,7 @@
         pzprDiv.style.display = 'block';
         orig.style.display = 'none';
         pzprDiv.innerHTML = ''; // Clear previous
-        debugArea.textContent = 'Starting load...\n';
+        debugArea.textContent += 'Starting load...\n';
 
         const log = (msg) => {
           console.log(msg);
@@ -248,44 +248,170 @@
       }
 
       function analyzeSvg(svg) {
-        const analysis = {
-          type: 'svg',
-          width: svg.getAttribute('width'),
-          height: svg.getAttribute('height'),
-          children: []
+        const circles = [];
+        const texts = [];
+        const paths = [];
+        const dashVertical = [];
+        const dashHorizontal = [];
+
+        const isCirclePath = (node) => {
+          if (node.tagName !== 'path') return false;
+          const d = node.getAttribute('d') || '';
+          const fill = (node.getAttribute('fill') || '').toLowerCase();
+          const stroke = (node.getAttribute('stroke') || '').toLowerCase();
+          return d.includes('A') && (fill === 'white' || stroke === 'black' || stroke === '#000000');
+        };
+
+        const addCircleFromPath = (node) => {
+          const bbox = node.getBBox();
+          console.log('Circle path bbox:', bbox);
+          const cx = bbox.x + bbox.width / 2;
+          const cy = bbox.y + bbox.height / 2;
+          const r = Math.max(bbox.width, bbox.height) / 2;
+          circles.push({
+            tag: 'circlePath',
+            cx,
+            cy,
+            r,
+            fill: node.getAttribute('fill'),
+            stroke: node.getAttribute('stroke'),
+            strokeWidth: node.getAttribute('stroke-width')
+          });
         };
 
         function traverse(node) {
-          const info = { tag: node.tagName };
-          if (node.id) info.id = node.id;
-          if (node.className && node.className.baseVal) info.class = node.className.baseVal;
-
-          // Extract specific attributes relevant to puzzles
-          if (node.tagName === 'circle') {
-            info.cx = node.getAttribute('cx');
-            info.cy = node.getAttribute('cy');
-            info.r = node.getAttribute('r');
-            info.fill = node.getAttribute('fill');
-          } else if (node.tagName === 'text') {
-            info.x = node.getAttribute('x');
-            info.y = node.getAttribute('y');
-            info.content = node.textContent;
+          if (node.tagName === 'text') {
+            texts.push({
+              tag: 'text',
+              x: parseFloat(node.getAttribute('x')),
+              y: parseFloat(node.getAttribute('y')),
+              content: node.textContent.trim()
+            });
+          } else if (isCirclePath(node)) {
+            addCircleFromPath(node);
+          } else if (node.tagName === 'circle') {
+            circles.push({
+              tag: 'circle',
+              cx: parseFloat(node.getAttribute('cx')),
+              cy: parseFloat(node.getAttribute('cy')),
+              r: parseFloat(node.getAttribute('r')),
+              fill: node.getAttribute('fill'),
+              stroke: node.getAttribute('stroke'),
+              strokeWidth: node.getAttribute('stroke-width')
+            });
           } else if (node.tagName === 'path') {
-            info.d = node.getAttribute('d');
-          }
-
-          if (node.children.length > 0) {
-            info.children = [];
-            for (let i = 0; i < node.children.length; i++) {
-              info.children.push(traverse(node.children[i]));
+            const dash = node.getAttribute('stroke-dasharray');
+            // Capture dashed grid lines
+            if (dash && dash.toLowerCase() !== 'none') {
+              const dAttr = node.getAttribute('d') || '';
+              const match = /M\s*([-\d.]+)\s+([-\d.]+)\s+L\s+([-\d.]+)\s+([-\d.]+)/i.exec(dAttr);
+              if (match) {
+                const x1 = parseFloat(match[1]), y1 = parseFloat(match[2]);
+                const x2 = parseFloat(match[3]), y2 = parseFloat(match[4]);
+                const dx = Math.abs(x2 - x1);
+                const dy = Math.abs(y2 - y1);
+                if (dx < dy) {
+                  const x = (x1 + x2) / 2;
+                  dashVertical.push(x);
+                } else {
+                  const y = (y1 + y2) / 2;
+                  dashHorizontal.push(y);
+                }
+              } else {
+                // Fallback to bbox orientation
+                const bb = node.getBBox();
+                if (bb.width < bb.height) {
+                  dashVertical.push(bb.x + bb.width / 2);
+                } else {
+                  dashHorizontal.push(bb.y + bb.height / 2);
+                }
+              }
             }
+            paths.push({
+              tag: 'path',
+              d: node.getAttribute('d'),
+              fill: node.getAttribute('fill'),
+              stroke: node.getAttribute('stroke'),
+              strokeWidth: node.getAttribute('stroke-width')
+            });
           }
-          return info;
+
+          for (let i = 0; i < node.children.length; i++) traverse(node.children[i]);
         }
 
-        for (let i = 0; i < svg.children.length; i++) {
-          analysis.children.push(traverse(svg.children[i]));
-        }
+        traverse(svg);
+
+        // Merge circle pairs (fill + stroke) that share the same center
+        const mergedCircles = [];
+        const tol = 1; // pixels
+        circles.forEach(c => {
+          const existing = mergedCircles.find(m => Math.hypot(m.cx - c.cx, m.cy - c.cy) <= tol);
+          if (existing) {
+            existing.r = Math.max(existing.r, c.r);
+            existing.fill = existing.fill || c.fill;
+            existing.stroke = existing.stroke || c.stroke;
+          } else {
+            mergedCircles.push({ ...c });
+          }
+        });
+
+        // Attach nearest text to circle if inside (within radius * 1.3)
+        const numberedCircles = mergedCircles.map(c => {
+          let best = null;
+          let bestDist = Infinity;
+          texts.forEach(t => {
+            const d = Math.hypot(t.x - c.cx, t.y - c.cy);
+            if (d < bestDist) {
+              best = t;
+              bestDist = d;
+            }
+          });
+          const inside = best && bestDist <= c.r * 1.3;
+          return { ...c, text: inside ? best.content : null };
+        });
+        //get cell width and height
+        const cellWidth = dashVertical.length > 1 ? dashVertical[1] - dashVertical[0] : null;
+        const cellHeight = dashHorizontal.length > 1 ? dashHorizontal[1] - dashHorizontal[0] : null;
+
+        //for each numberedCircles, calculate cell position
+        numberedCircles.forEach(c => {
+          if (cellWidth && cellHeight) {
+            const col = Math.floor((c.cx ) / cellWidth);
+            const row = Math.floor((c.cy ) / cellHeight);
+            c.cell = {  col,row };
+            //if we got position , remove other attribute in circle
+            c.cx = null;
+            c.cy = null;
+          } else {
+            c.cell = null;
+          }
+        });
+
+        //for each texts without circle, calculate cell position
+        texts.forEach(t => {
+            if (cellWidth && cellHeight) {
+                const col = Math.floor((t.x ) / cellWidth);
+                const row = Math.floor((t.y ) / cellHeight);
+                t.cell = {  col,row };
+                } else {
+                t.cell = null;
+                }
+        });
+
+        const analysis = {
+          type: 'svg',
+          //width: svg.getAttribute('width'),
+          //height: svg.getAttribute('height'),
+          circles: numberedCircles,
+          texts,
+          grid: {
+            vertical: dashVertical.sort((a, b) => a - b),
+            horizontal: dashHorizontal.sort((a, b) => a - b)
+          },
+          rows: dashHorizontal.length > 1 ? dashHorizontal.length + 1 : null,
+          cols: dashVertical.length > 1 ? dashVertical.length + 1 : null,
+          pathsCount: paths.length
+        };
 
         debugArea.textContent = JSON.stringify(analysis, null, 2);
       }
