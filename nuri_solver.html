@@ -44,13 +44,6 @@
       color: #555;
     }
 
-    textarea {
-      width: 100%;
-      min-height: 140px;
-      margin-top: 8px;
-      font-family: monospace;
-    }
-
     button {
       padding: 6px 10px;
     }
@@ -72,18 +65,11 @@
 <body>
   <h1>Nurimisaki Solver OCR / SVG</h1>
   <div class="row">
-    <label for="fileInput">Upload:</label>
-    <input type="file" id="fileInput" accept="image/*">
-    <label for="urlInput">or URL:</label>
+    <label for="urlInput">URL:</label>
     <input type="text" id="urlInput" placeholder="Paste image or pzv.jp URL" size="60">
     <button id="loadUrl">Load URL</button>
   </div>
   <div class="row" style="margin-top:8px;">
-    <label for="rowsInput">Rows</label>
-    <input type="number" id="rowsInput" value="10" min="1">
-    <label for="colsInput">Cols</label>
-    <input type="number" id="colsInput" value="10" min="1">
-    <button id="recognizeBtn">Recognize Cells</button>
     <button id="solveBtn">Solve Puzzle</button>
   </div>
   <script src="csp.js"></script>
@@ -99,8 +85,6 @@
       <canvas id="solution" width="400" height="400"></canvas>
     </div>
   </div>
-  <label for="resultArea" style="display:block;margin-top:12px;">Cell results (rows separated by new lines):</label>
-  <textarea id="resultArea" placeholder="Run recognition to fill this area..."></textarea>
   <p>Debug:</p>
   <div id="debugArea">Waiting for run...</div>
 
@@ -109,16 +93,13 @@
       const orig = document.getElementById('orig');
       const pzprDiv = document.getElementById('pzpr-div');
       const statusEl = document.getElementById('status');
-      const resultArea = document.getElementById('resultArea');
-      const rowsInput = document.getElementById('rowsInput');
-      const colsInput = document.getElementById('colsInput');
-      const recognizeBtn = document.getElementById('recognizeBtn');
       const debugArea = document.getElementById('debugArea');
 
       let lastWarpedReady = false; // Kept for OCR flow compatibility
       let worker = null;
       let gridLines = null;
       let pzprPuzzle = null;
+      let gridText = '';
 
       const setStatus = (msg) => statusEl.textContent = msg;
 
@@ -232,6 +213,12 @@
             log('Puzzle opened callback fired.');
             // setCanvas expects the DOM element, not an id string
             puzzle.setCanvas(pzprDiv);
+            puzzle.setCanvasSize(pzprDiv.clientWidth, pzprDiv.clientHeight);
+            // Make the rendered puzzle view-only
+            pzprDiv.style.pointerEvents = 'none';
+            // Use play mode and clear any selection cursor
+            if (puzzle.setMode) puzzle.setMode('play');
+            if (puzzle.cursor && puzzle.cursor.reset) puzzle.cursor.reset();
             puzzle.redraw();
             log('Redraw called.');
 
@@ -239,6 +226,10 @@
             setTimeout(() => {
               const svg = pzprDiv.querySelector('svg');
               if (svg) {
+                // Hide cursor rectangles that may remain after reset
+                const style = document.createElement('style');
+                style.textContent = 'rect.cursor, rect#cursor { display: none !important; }';
+                svg.appendChild(style);
                 setStatus('Puzzle loaded. SVG found.');
                 log('SVG found.');
                 analyzeSvg(svg);
@@ -299,13 +290,6 @@
         debugArea.textContent = JSON.stringify(analysis, null, 2);
       }
 
-      document.getElementById('fileInput').addEventListener('change', e => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const url = URL.createObjectURL(file);
-        loadImage(url).then(handleImage).catch(err => setStatus(err.message));
-      });
-
       document.getElementById('loadUrl').addEventListener('click', () => {
         const url = document.getElementById('urlInput').value.trim();
         if (!url) return;
@@ -321,21 +305,21 @@
       const solutionCanvas = document.getElementById('solution');
 
       solveBtn.addEventListener('click', () => {
-        // Solver logic (requires grid data in resultArea)
-        const text = resultArea.value;
-        const rows = parseInt(rowsInput.value, 10);
-        const cols = parseInt(colsInput.value, 10);
-        if (!text) {
+        // Solver logic (requires grid data in gridText)
+        const text = gridText;
+        const lines = text.trim().split('\n').filter(l => l.trim().length > 0);
+        const rows = lines.length;
+        const cols = lines.reduce((m, line) => Math.max(m, line.trim().split(/\s+/).length), 0);
+        if (!text || rows === 0 || cols === 0) {
           setStatus('No grid data to solve.');
           return;
         }
         // ... (Existing solver logic)
-        // For brevity, we assume the user will populate resultArea manually or via OCR (if fixed)
+        // For brevity, we assume the user will populate gridText manually or via OCR (if fixed)
         // or we could extract from SVG analysis in the future.
 
         // Re-implement basic parsing for demo
         const grid = [];
-        const lines = text.trim().split('\n');
         for (let r = 0; r < rows; r++) {
           const rowVals = (lines[r] || '').trim().split(/\s+/);
           const row = [];
