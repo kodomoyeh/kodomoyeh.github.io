@@ -264,7 +264,7 @@
 
         const addCircleFromPath = (node) => {
           const bbox = node.getBBox();
-          console.log('Circle path bbox:', bbox);
+          //console.log('Circle path bbox:', bbox);
           const cx = bbox.x + bbox.width / 2;
           const cy = bbox.y + bbox.height / 2;
           const r = Math.max(bbox.width, bbox.height) / 2;
@@ -374,28 +374,37 @@
         const cellHeight = dashHorizontal.length > 1 ? dashHorizontal[1] - dashHorizontal[0] : null;
 
         //for each numberedCircles, calculate cell position
-        numberedCircles.forEach(c => {
+        numberedCircles.forEach((c, i, arr) => {
           if (cellWidth && cellHeight) {
             const col = Math.floor((c.cx ) / cellWidth);
             const row = Math.floor((c.cy ) / cellHeight);
+            //delete all attribute in c
             c.cell = {  col,row };
-            //if we got position , remove other attribute in circle
-            c.cx = null;
-            c.cy = null;
+            arr[i] = {
+                tag: c.tag,
+                cell: { col, row },
+            };
+
+
           } else {
             c.cell = null;
           }
         });
 
         //for each texts without circle, calculate cell position
-        texts.forEach(t => {
+        texts.forEach((t, i, arr) => {
             if (cellWidth && cellHeight) {
                 const col = Math.floor((t.x ) / cellWidth);
                 const row = Math.floor((t.y ) / cellHeight);
-                t.cell = {  col,row };
-                } else {
+                
+                arr[i] = {
+                    tag: t.tag,
+                    text: t.content,
+                    cell: { col, row },
+                };
+            } else {
                 t.cell = null;
-                }
+            }
         });
 
         const analysis = {
@@ -404,13 +413,13 @@
           //height: svg.getAttribute('height'),
           circles: numberedCircles,
           texts,
-          grid: {
+          /*grid: {
             vertical: dashVertical.sort((a, b) => a - b),
             horizontal: dashHorizontal.sort((a, b) => a - b)
-          },
+          },*/
           rows: dashHorizontal.length > 1 ? dashHorizontal.length + 1 : null,
           cols: dashVertical.length > 1 ? dashVertical.length + 1 : null,
-          pathsCount: paths.length
+          //pathsCount: paths.length
         };
 
         debugArea.textContent = JSON.stringify(analysis, null, 2);
