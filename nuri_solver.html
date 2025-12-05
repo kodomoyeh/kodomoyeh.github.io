@@ -28,7 +28,7 @@
     }
 
     .svgblock {
-      background-color : #000000;
+      background-color: #000000;
     }
 
     #canvases {
@@ -39,7 +39,7 @@
     }
 
     canvas {
-      
+
       border: 1px solid #ccc;
     }
 
@@ -69,7 +69,8 @@
   <h1>Nurimisaki Solver OCR / SVG</h1>
   <div class="row">
     <label for="urlInput">URL:</label>
-    <input type="text" id="urlInput" placeholder="Paste image or pzv.jp URL" size="60" value="http://pzv.jp/p.html?nurimisaki/10/10/3g4zk.l.g.r2g5g3i.q.l.k.g.p3i">
+    <input type="text" id="urlInput" placeholder="Paste image or pzv.jp URL" size="60"
+      value="https://puzz.link/p?nurimisaki/8/8/g.k.j.i4j6g.i.n.i.g3j3i.j.k.g">
     <button id="loadUrl">Load URL</button>
   </div>
   <div class="row" style="margin-top:8px;">
@@ -85,7 +86,8 @@
     </div>
     <div>
       <p>Solution</p>
-      <div id="pzpr-solution" style="width:400px; height:400px; border:1px solid #ccc; display:none; position:relative;"></div>
+      <div id="pzpr-solution"
+        style="width:400px; height:400px; border:1px solid #ccc; display:none; position:relative;"></div>
       <canvas id="solution" width="400" height="400"></canvas>
     </div>
   </div>
@@ -99,7 +101,7 @@
       const solution = document.getElementById('solution');
       const pzprDiv = document.getElementById('pzpr-div');
       const pzprSolution = document.getElementById('pzpr-solution');
-      
+
       const statusEl = document.getElementById('status');
       const debugArea = document.getElementById('debugArea');
 
@@ -407,7 +409,7 @@
         grid = Array(cols).fill(null).map(() => Array(rows).fill('.'));
 
         //in #solution add div for every cell and set it as display:none
-        const solutionDiv = document.getElementById('pzpr-solution'); 
+        const solutionDiv = document.getElementById('pzpr-solution');
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
             const cellDiv = document.createElement('div');
@@ -417,27 +419,27 @@
             solutionDiv.appendChild(cellDiv);
             //set it position absolute
             cellDiv.style.position = 'absolute';
-            cellDiv.style.left = `${cellWidth*c +10}px`;
-            cellDiv.style.top = `${cellHeight*r +10}px`;
+            cellDiv.style.left = `${cellWidth * c + 10}px`;
+            cellDiv.style.top = `${cellHeight * r + 10}px`;
             cellDiv.style.width = `${cellWidth || 40}px`;
             cellDiv.style.height = `${cellHeight || 40}px`;
           }
         }
-          
-        
 
-        
+
+
+
         //for each numberedCircles, calculate cell position
         numberedCircles.forEach((c, i, arr) => {
           if (cellWidth && cellHeight) {
-            const col = Math.floor((c.cx ) / cellWidth);
-            const row = Math.floor((c.cy ) / cellHeight);
+            const col = Math.floor((c.cx) / cellWidth);
+            const row = Math.floor((c.cy) / cellHeight);
             //delete all attribute in c
-            c.cell = {  col,row };
+            c.cell = { col, row };
             grid[col][row] = -1;
             arr[i] = {
-                tag: c.tag,
-                cell: { col, row },
+              tag: c.tag,
+              cell: { col, row },
             };
 
 
@@ -448,19 +450,19 @@
 
         //for each texts without circle, calculate cell position
         texts.forEach((t, i, arr) => {
-            if (cellWidth && cellHeight) {
-                const col = Math.floor((t.x ) / cellWidth);
-                const row = Math.floor((t.y ) / cellHeight);
-                const parsed = parseInt(t.content, 10);
-                grid[col][row] = Number.isNaN(parsed) ? t.content : parsed;
-                arr[i] = {
-                    tag: t.tag,
-                    text: parsed,
-                    cell: { col, row },
-                };
-            } else {
-                t.cell = null;
-            }
+          if (cellWidth && cellHeight) {
+            const col = Math.floor((t.x) / cellWidth);
+            const row = Math.floor((t.y) / cellHeight);
+            const parsed = parseInt(t.content, 10);
+            grid[col][row] = Number.isNaN(parsed) ? t.content : parsed;
+            arr[i] = {
+              tag: t.tag,
+              text: parsed,
+              cell: { col, row },
+            };
+          } else {
+            t.cell = null;
+          }
         });
         //clone grid to init_grid
         init_grid = grid.map(row => row.slice());
@@ -503,77 +505,81 @@
         // Solver logic (requires grid data in gridText)
         console.log("Starting solve...");
         console.log("grid=" + JSON.stringify(grid));
-        const rows = grid.length;
-        const cols = grid[0].length;
+        const cols = grid.length;  // grid is [x][y] so length is cols
+        const rows = grid[0].length;  // grid[0].length is rows
         setStatus('Solving...');
         setTimeout(() => runCSP(grid, rows, cols), 150);
       });
 
-function visualize(assigned) {
+      function visualize(assigned) {
 
-			console.log("vis->" + JSON.stringify(assigned));
+        console.log("vis->" + JSON.stringify(assigned));
 
-  var appBanners = document.getElementsByClassName('svgblock');
-  for (var i = 0; i < appBanners.length; i ++) {
-    appBanners[i].style.display = 'none';
-  }//hide all first
-	
-			 
-  for (const key in assigned) {
-  
-    var solution = assigned[key][0];
-    //console.log("solution = "+solution);
-    //solution = c,r
-    var parts = key.split(',');
-    var x = parts[0];
-    var y = parts[1];
-        
-    var svgblock = document.getElementById('cell-'+x+'-'+y);
-    //var svgblock = $("#apad-map").contents().find("#x3"+type+"_"+direction)
-    if (svgblock) {
-      //console.log("we got "+svgblock);
-                if(solution==1)
-                {
-                  if(init_grid[x][y]=='.')
-                      grid[x][y]='_';
-                  else
-                    grid[x][y]=init_grid[x][y];
-                    svgblock.style.display = 'none';
-                }
-                else
-                {
-                    grid[y][x]='B';
-                    svgblock.style.display = '';
-                }
-    }
-
-  }
+        var appBanners = document.getElementsByClassName('svgblock');
+        for (var i = 0; i < appBanners.length; i++) {
+          appBanners[i].style.display = 'none';
+        }//hide all first
 
 
-  const ROW_SIZE = grid.length;
-  const COL_SIZE = grid[0].length;
+        for (const key in assigned) {
 
-  //$("#drawbase").html($("#drawbase").html());
-    var text = '', divider = '';
-    for (var i = 0; i < COL_SIZE * 6 + 1; i++) { divider += '-'; }
-    text += divider + '<br/>'
-  for (var i = 0; i < ROW_SIZE; i++) {
-    for (var j = 0; j < COL_SIZE; j++) {
-      text += '|';
-      var mid = grid[j][i];
-    if(mid==".")
-      text += '&nbsp; ' + '?' + ' &nbsp;';
-    else if(mid==-1)
-      text += '&nbsp; ' + 'O' + ' &nbsp;';
-    else
-      text += '&nbsp; ' + mid + ' &nbsp;';
-    }
-    text += '|<br/>' + divider + '<br/>'
-  }
+          var solution = assigned[key][0];
+          //console.log("solution = "+solution);
+          //solution = c,r
+          var parts = key.split(',');
+          var x = parts[0];
+          var y = parts[1];
+
+          var svgblock = document.getElementById('cell-' + x + '-' + y);
+          //var svgblock = $("#apad-map").contents().find("#x3"+type+"_"+direction)
+          if (svgblock) {
+            //console.log("we got "+svgblock);
+            if (solution == 1) {
+              if (init_grid[x][y] == '.')
+                grid[x][y] = '_';
+              else
+                grid[x][y] = init_grid[x][y];
+              svgblock.style.display = '';
+              svgblock.style.opacity = 0.5;
+              svgblock.style.color = 'gray'
+
+            }
+            else {
+              grid[x][y] = 'B';
+              svgblock.style.display = '';
+              svgblock.style.opacity = 1;
+              svgblock.style.color = 'black'
+
+            }
+          }
+
+        }
+
+
+        const ROW_SIZE = grid.length;
+        const COL_SIZE = grid[0].length;
+
+        //$("#drawbase").html($("#drawbase").html());
+        var text = '', divider = '';
+        for (var i = 0; i < COL_SIZE * 6 + 1; i++) { divider += '-'; }
+        text += divider + '<br/>'
+        for (var i = 0; i < ROW_SIZE; i++) {
+          for (var j = 0; j < COL_SIZE; j++) {
+            text += '|';
+            var mid = grid[j][i];
+            if (mid == ".")
+              text += '&nbsp; ' + '?' + ' &nbsp;';
+            else if (mid == -1)
+              text += '&nbsp; ' + 'O' + ' &nbsp;';
+            else
+              text += '&nbsp; ' + mid + ' &nbsp;';
+          }
+          text += '|<br/>' + divider + '<br/>'
+        }
         var apad = document.getElementById('apad');
-    apad.innerHTML = text;
-      return text;
-}
+        apad.innerHTML = text;
+        return text;
+      }
 
 
 
@@ -596,7 +602,7 @@ function visualize(assigned) {
           variables, constraints,
           validate: (assigned, unassigned) => validateNuri(assigned, unassigned, grid, rows, cols)
         };
-        problem.cb=visualize
+        problem.cb = visualize
         problem.timeStep = 1;
         try {
           //visualize(assigned);
@@ -608,7 +614,7 @@ function visualize(assigned) {
             setStatus('Solved!');
             debugArea.textContent = '\n\nSolution:\n' + JSON.stringify(result, null, 2);
             drawSolution(result, grid, rows, cols);
-            
+
           }
         } catch (e) {
           setStatus('Error: ' + e.message);
@@ -621,9 +627,9 @@ function visualize(assigned) {
         // For brevity in this thought process, I'll ensure the replacement content has the full logic.
         // See actual replacement content below.
         let localgrid = [];
-        localgrid = Array(rows).fill(null).map(() => Array(cols).fill('.'));
+        localgrid = Array(cols).fill(null).map(() => Array(rows).fill('.'));  // [x][y] = [cols][rows]
         for (const key in assigned) {
-			
+
           var solution = assigned[key][0];
           //console.log(key+" = "+solution);
           //solution = c,r
@@ -631,16 +637,14 @@ function visualize(assigned) {
           var x = parts[0];
           var y = parts[1];
 
-          if(solution==1)
-          {
-              localgrid[x][y]=init_grid[x][y];
+          if (solution == 1) {
+            localgrid[x][y] = init_grid[x][y];
           }
-          else
-          {
-              localgrid[x][y]='B';
+          else {
+            localgrid[x][y] = 'B';
           }
 
-			  }
+        }
 
         //print grid
         //console.log("Validating... grid=" + JSON.stringify(localgrid));
@@ -665,35 +669,34 @@ function visualize(assigned) {
         let debug = 0;
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
-            debug=0
-            if(c==2 && r==0) debug=0;
+            debug = 0
+            if (c == 2 && r == 0) debug = 0;
 
             const val = getVal(c, r);
             if (val === null || val === 0) continue;
             const cell = localgrid[c][r];
             const neighbors = [{ c: c - 1, r: r }, { c: c + 1, r: r }, { c: c, r: r - 1 }, { c: c, r: r + 1 }];
             let white = 0, pot = 0;
-            let nc=0 , nr=0;
+            let nc = 0, nr = 0;
             for (const n of neighbors) {
               const nv = getVal(n.c, n.r);
-              if (nv === 1) 
-              {
-                nc=n.c
-                nr=n.r
+              if (nv === 1) {
+                nc = n.c
+                nr = n.r
                 white++;
               }
               if (nv === null) pot++;
             }
-//            if (cell === 'circle' || cell.type === 'number') {
+            //            if (cell === 'circle' || cell.type === 'number') {
             if (cell == -1 || cell > 0) {
               if (white > 1) return false;
               if (white + pot < 1) return false;
               if (pot === 0 && white !== 1) return false;
-              
-              if(debug==1){
+
+              if (debug == 1) {
                 console.log(`At cell ${c},${r} with cell=${cell}, white=${white}, pot=${pot}`);
               }
-            } 
+            }
             else if (cell !== 'B') {
               if (white + pot < 2) return false;        // 就算未來全變白也湊不到 2
             }
@@ -702,16 +705,16 @@ function visualize(assigned) {
               for (const n of neighbors) {
                 if (n.c === nc && n.r === nr) continue;
                 const nv = getVal(n.c, n.r);
-                if(nv === 1) return false
-     
+                if (nv === 1) return false
+
               }
               // Number logic (simplified for length)
-              
+
               let length = cell;
               //use nc,nr c r to trace the line
               const dx = nc - c;
               const dy = nr - r;
-              if(dx+dy!=1) return false; //invalid
+              if (dx + dy != 1) return false; //invalid
               for (let step = 1; step < length; step++) {
                 const currR = r + dy * step;
                 const currC = c + dx * step;
@@ -722,23 +725,20 @@ function visualize(assigned) {
               }
               const endR = r + dy * length;
               const endC = c + dx * length;
-              if(endR<0 || endR>=rows || endC<0 || endC>=cols) return false; //out of bounds
+              if (endR < 0 || endR >= rows || endC < 0 || endC >= cols) return false; //out of bounds
               const endVal = getVal(endC, endR);
-              
-              if(endVal===1) return false; //end on white
+
+              if (endVal === 1) return false; //end on white
               //const nkey = `${endC},${endR}`;
               //assigned[nkey] = [0]; //set to black
-          
-              
+
+
             }
           }
         }
         // 3. Connectivity
         // ... (Full logic needed)
- if (Object.keys(unassigned).length > 0) {
-  // 還有未指定的格子，不檢查連通性
-  return true;
-}
+
 
 
         let totalWhite = 0;
@@ -746,69 +746,67 @@ function visualize(assigned) {
 
         // 1️⃣ 找出白格總數 & 任一個起點
         for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-              //const key = `${c},${r}`;
-              if (getVal(c, r) == 0)
-              {
-                //console.log("black at "+c+","+r);
-              }
-                  //localgrid[c][r] = 'B'; //black cell
-              else{
-                  totalWhite++;
-                  if (!start) start = { r, c };
-              }
-              
+          for (let c = 0; c < cols; c++) {
+            //const key = `${c},${r}`;
+            if (getVal(c, r) == 0 || localgrid[c][r] == -1) {
+              //console.log("black at "+c+","+r);
             }
+            //localgrid[c][r] = 'B'; //black cell
+            else {
+              totalWhite++;
+              if (!start) start = { r, c };
+            }
+
+          }
         }
 
         // 如果沒有白格，看你的規則，這裡我先當作「不通過」
-        if (totalWhite === 0) 
-        {
-            console.log("no white cell");
-            return false;
+        if (totalWhite === 0) {
+          console.log("no white cell");
+          return false;
         }
         //console.log("start="+JSON.stringify(start));
 
         // 2️⃣ BFS / DFS 走白格
-        const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+        const visited = Array.from({ length: cols }, () => Array(rows).fill(false));  // [x][y] = [cols][rows]
         const queue = [];
         queue.push(start);
-        visited[start.r][start.c] = true;
+        visited[start.c][start.r] = true;  // [x][y] = [c][r]
 
         const dirs = [
-            [1, 0],
-            [-1, 0],
-            [0, 1],
-            [0, -1],
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
         ];
 
         let connectedWhite = 0;
 
         while (queue.length > 0) {
-            const { r, c } = queue.shift();
-            connectedWhite++;
+          const { r, c } = queue.shift();
+          connectedWhite++;
 
-            for (const [dr, dc] of dirs) {
-                const nr = r + dr;
-                const nc = c + dc;
-                if (
-                    nr >= 0 &&
-                    nr < rows &&
-                    nc >= 0 &&
-                    nc < cols &&
-                    !visited[nc][nr] &&
-                    getVal(nc, nr) === 1
-                ) {
-                    visited[nc][nr] = true;
-                    queue.push({ r: nr, c: nc });
-                }
+          for (const [dr, dc] of dirs) {
+            const nr = r + dr;
+            const nc = c + dc;
+            if (
+              nr >= 0 &&
+              nr < rows &&
+              nc >= 0 &&
+              nc < cols &&
+              !visited[nc][nr] &&
+              getVal(nc, nr) !== 0 && localgrid[nc][nr] != -1
+            ) {
+              visited[nc][nr] = true;  // [x][y] = [c][r]
+              queue.push({ r: nr, c: nc });
             }
+          }
         }
         //console.log("connectedWhite="+connectedWhite+", totalWhite="+totalWhite);
         // 3️⃣ 比較 BFS 走到的白格數 vs 總白格數
-        if ( connectedWhite != totalWhite) {
-            //console.log("connectedWhite="+connectedWhite+", totalWhite="+totalWhite);
-            return false; // 不通過
+        if (connectedWhite != totalWhite) {
+          //console.log("connectedWhite="+connectedWhite+", totalWhite="+totalWhite);
+          return false; // 不通過
         }
 
 
