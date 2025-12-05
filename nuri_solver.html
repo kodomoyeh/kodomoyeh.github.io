@@ -714,7 +714,7 @@
               //use nc,nr c r to trace the line
               const dx = nc - c;
               const dy = nr - r;
-              if (dx + dy != 1) return false; //invalid
+              if (Math.abs(dx) + Math.abs(dy) !== 1) return false; //invalid
               for (let step = 1; step < length; step++) {
                 const currR = r + dy * step;
                 const currC = c + dx * step;
@@ -732,93 +732,102 @@
               //const nkey = `${endC},${endR}`;
               //assigned[nkey] = [0]; //set to black
 
-
             }
           }
         }
-        // 3. Connectivity
-        // ... (Full logic needed)
 
+        // 3. Connectivity Check (Relaxed for partial assignments)
+        // We only require that all "Must-Connect" components (Assigned White cells & Circles)
+        // are connected to each other via the "Stream" (White/Unassigned paths).
+        // Isolated islands of Unassigned cells are allowed (they will become Black).
 
-
-        let totalWhite = 0;
-        let start = null;
-
-        // 1️⃣ 找出白格總數 & 任一個起點
+        let targets = []; // Cells that MUST be connected
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
-            //const key = `${c},${r}`;
-            if (getVal(c, r) == 0 || localgrid[c][r] == -1) {
-              //console.log("black at "+c+","+r);
-            }
-            //localgrid[c][r] = 'B'; //black cell
-            else {
-              totalWhite++;
-              if (!start) start = { r, c };
-            }
+            const val = getVal(c, r);
+            const isCircle = localgrid[c][r] === -1;
+            const isAssignedWhite = val === 1 && !isCircle;
 
+            if (isCircle || isAssignedWhite) {
+              targets.push({ c, r, isCircle });
+            }
           }
         }
 
-        // 如果沒有白格，看你的規則，這裡我先當作「不通過」
-        if (totalWhite === 0) {
-          console.log("no white cell");
-          return false;
-        }
-        //console.log("start="+JSON.stringify(start));
+        if (targets.length === 0) return true;
 
-        // 2️⃣ BFS / DFS 走白格
-        const visited = Array.from({ length: cols }, () => Array(rows).fill(false));  // [x][y] = [cols][rows]
+        // BFS Initialization
+        const visited = Array.from({ length: cols }, () => Array(rows).fill(false)); // [x][y]
         const queue = [];
-        queue.push(start);
-        visited[start.c][start.r] = true;  // [x][y] = [c][r]
 
-        const dirs = [
-          [1, 0],
-          [-1, 0],
-          [0, 1],
-          [0, -1],
-        ];
+        // Start BFS from the first target's accessible stream cells
+        const startNode = targets[0];
+        if (startNode.isCircle) {
+          // Add all valid neighbors of the circle to queue
+          const neighbors = [{ c: startNode.c - 1, r: startNode.r }, { c: startNode.c + 1, r: startNode.r }, { c: startNode.c, r: startNode.r - 1 }, { c: startNode.c, r: startNode.r + 1 }];
+          for (const n of neighbors) {
+            if (n.c >= 0 && n.c < cols && n.r >= 0 && n.r < rows) {
+              const nVal = getVal(n.c, n.r);
+              const nIsCircle = localgrid[n.c][n.r] === -1;
+              // Can traverse if not Black and not Circle
+              if (nVal !== 0 && !nIsCircle) {
+                if (!visited[n.c][n.r]) {
+                  visited[n.c][n.r] = true;
+                  queue.push(n);
+                }
+              }
+            }
+          }
+        } else {
+          // StartNode is a Stream cell
+          visited[startNode.c][startNode.r] = true;
+          queue.push({ c: startNode.c, r: startNode.r });
+        }
 
-        let connectedWhite = 0;
-
+        // Run BFS on the "Stream" (White + Unassigned, excluding Circles)
+        const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
         while (queue.length > 0) {
-          const { r, c } = queue.shift();
-          connectedWhite++;
+          const { c, r } = queue.shift();
 
-          for (const [dr, dc] of dirs) {
-            const nr = r + dr;
+          for (const [dc, dr] of dirs) {
             const nc = c + dc;
-            if (
-              nr >= 0 &&
-              nr < rows &&
-              nc >= 0 &&
-              nc < cols &&
-              !visited[nc][nr] &&
-              getVal(nc, nr) !== 0 && localgrid[nc][nr] != -1
-            ) {
-              visited[nc][nr] = true;  // [x][y] = [c][r]
-              queue.push({ r: nr, c: nc });
+            const nr = r + dr;
+            if (nc >= 0 && nc < cols && nr >= 0 && nr < rows) {
+              const nVal = getVal(nc, nr);
+              const nIsCircle = localgrid[nc][nr] === -1;
+
+              // Traverse if not Black and not Circle
+              if (nVal !== 0 && !nIsCircle && !visited[nc][nr]) {
+                visited[nc][nr] = true;
+                queue.push({ c: nc, r: nr });
+              }
             }
           }
         }
-        //console.log("connectedWhite="+connectedWhite+", totalWhite="+totalWhite);
-        // 3️⃣ 比較 BFS 走到的白格數 vs 總白格數
-        if (connectedWhite != totalWhite) {
-          //console.log("connectedWhite="+connectedWhite+", totalWhite="+totalWhite);
-          return false; // 不通過
+
+        // Verify all targets are connected
+        for (const t of targets) {
+          if (t.isCircle) {
+            // A circle is connected if ANY of its neighbors are visited
+            const neighbors = [{ c: t.c - 1, r: t.r }, { c: t.c + 1, r: t.r }, { c: t.c, r: t.r - 1 }, { c: t.c, r: t.r + 1 }];
+            let connected = false;
+            for (const n of neighbors) {
+              if (n.c >= 0 && n.c < cols && n.r >= 0 && n.r < rows) {
+                if (visited[n.c][n.r]) {
+                  connected = true;
+                  break;
+                }
+              }
+            }
+            if (!connected) return false;
+          } else {
+            // Stream cell must be visited
+            if (!visited[t.c][t.r]) return false;
+          }
         }
-
-
-
 
         return true;
       }
-
-      // I need to make sure I don't break the file by omitting code.
-      // I will copy the validation logic exactly.
-
-      // ... (Rest of the file)
     })();
   </script>
 </body>
