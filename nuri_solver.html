@@ -471,6 +471,8 @@
       function visualize(assigned) {
         vis_count++;
         debugArea.textContent += '\n\nVisualization step ' + vis_count 
+        //autoscroll to bottom
+        debugArea.scrollTop = debugArea.scrollHeight;
        // console.log("in vis assign = " + JSON.stringify(assigned));
         grid = init_grid.map(row => row.slice());
         //console.log("vis->" + JSON.stringify(grid));
@@ -546,17 +548,88 @@
         // ... (Existing CSP logic, assumed to be in scope or we need to copy it back if we replaced the whole file)
         // Since I am replacing from line 67 to 685, I need to include the CSP logic or reference it.
         // The previous file had runCSP defined inside the IIFE. I must include it.
-
+        console.log("Running CSP...");
+        console.log("grid=" + JSON.stringify(grid));
+        console.log("rows=" + rows + ", cols=" + cols);
         const variables = {};
         const constraints = [];
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
             const cell = grid[c][r];
             //if (cell.type === 'number' || cell.type === 'circle') variables[`${r},${c}`] = [1];
-            if (cell > 0 || cell === -1) variables[`${c},${r}`] = [1];
-            else variables[`${c},${r}`] = [0, 1]; //1 for white , 0 for black
+            if (cell > 0 || cell === -1) 
+              variables[`${c},${r}`] = [1];
+            else 
+              variables[`${c},${r}`] = [0, 1]; //1 for white , 0 for black
+          
+            let debug = 0;
+            //if(c == 0 && r ==2) debug=1;
+
+            console.log("cell at "+c+","+r+" = "+cell);
+            if(cell > 0)
+            {
+              const length = cell;
+              const neighbors = [{ c: c - 1, r: r }, { c: c + 1, r: r }, { c: c, r: r - 1 }, { c: c, r: r + 1 }].filter(n =>
+                n.c >= 0 && n.c < cols &&
+                n.r >= 0 && n.r < rows
+              );
+              let nc = 0, nr = 0;
+              for (const n of neighbors) {
+                if(debug==1)
+                  console.log("neighbor = "+JSON.stringify(n)+"="+grid[n.c][n.r]);
+                nc = n.c
+                nr = n.r
+                const nkey = `${nc},${nr}`;
+                const nv = grid[nc][nr];
+
+                if (nv === ".") 
+                {
+                  console.log("length="+length+"typeof length="+typeof length);
+                  const dx = nc - c;
+                  const dy = nr - r;
+                  for (let step = 1; step < length; step++) {
+                    const currR = r + dy * step;
+                    const currC = c + dx * step;
+
+                    if(debug==1)
+                      console.log("checking step "+step+" at "+currC+","+currR);
+                    if (currR < 0 || currR >= rows || currC < 0 || currC >= cols)
+                    {
+                      
+                      variables[nkey] = [0]; //set to black
+                      console.log("5.1====================="+nkey+" set to black");
+                      debugArea.textContent += `${nkey} set to black\n`;
+                      continue; //out of bounds
+                    }
+                    const currVal = grid[currC][currR];
+//                    if (currVal === '.') break; //undecided
+                    if (currVal === 0) 
+                    {
+             
+                      variables[nkey] = [0]; //set to black
+                      console.log("5.2====================="+nkey+" set to black");
+                      debugArea.textContent += `${nkey} set to black\n`;
+                      continue;
+                    }
+                    if ( grid[currC][currR] > 0 && length != grid[currC][currR]) 
+                    {
+           
+                      variables[nkey] = [0]; //set to black
+                      console.log("5.3====================="+nkey+" set to black");
+                      debugArea.textContent += `${nkey} set to black\n`;
+                      continue;
+                    }
+                    //advance
+                  }
+                }
+              }
+            }
+
+
+
           }
         }
+        console.log("variables=" + JSON.stringify(variables));
         const problem = {
           variables, constraints,
           validate: (assigned, unassigned) => validateNuri(assigned, unassigned, grid, rows, cols)
@@ -564,8 +637,10 @@
         problem.cb = visualize
         problem.timeStep = 1;
         try {
-          //visualize(assigned);
+          //visualize({}); //initial
+          //const result = '';
           const result = csp.solve(problem);
+          
           if (result === 'FAILURE') {
             setStatus('No solution found.');
             debugArea.textContent += 'No solution found.';
@@ -591,15 +666,72 @@
         // I will copy the validation logic from the previous file to ensure it works.
         // For brevity in this thought process, I'll ensure the replacement content has the full logic.
         // See actual replacement content below.
+        const getVal = (c, r) => {
+          if (r < 0 || r >= rows || c < 0 || c >= cols) return 0;
+          const key = `${c},${r}`;
+          if (assigned[key] !== undefined) return assigned[key][0];
+          return null;
+        };
+
+
         let localgrid = [];
         localgrid = Array(cols).fill(null).map(() => Array(rows).fill('.'));  // [x][y] = [cols][rows]
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
             const cell = init_grid[c][r];
             //if (cell.type === 'number' || cell.type === 'circle') variables[`${r},${c}`] = [1];
-            if (cell > 0 || cell === -1) 
-              assigned[`${c},${r}`]=[1];
+            //if (cell > 0 || cell === -1) 
+             // assigned[`${c},${r}`]=[1];
               //assigned.push([`${c},${r}`],[1]);
+            /*if(cell > 0)
+            {
+              const neighbors = [{ c: c - 1, r: r }, { c: c + 1, r: r }, { c: c, r: r - 1 }, { c: c, r: r + 1 }].filter(n =>
+                n.c >= 0 && n.c < cols &&
+                n.r >= 0 && n.r < rows
+              );
+              let nc = 0, nr = 0;
+              for (const n of neighbors) {
+                const nv = getVal(n.c, n.r);
+                if (nv === null) 
+                {
+                  nc = n.c
+                  nr = n.r
+                  const dx = nc - c;
+                  const dy = nr - r;
+                  for (let step = 1; step < length; step++) {
+                    const currR = r + dy * step;
+                    const currC = c + dx * step;
+                    if (currR < 0 || currR >= rows || currC < 0 || currC >= cols)
+                    {
+                      const nkey = `${nc},${nr}`;
+                      assigned[nkey] = [0]; //set to black
+                      console.log("5.1====================="+nkey+" set to black");
+                      debugArea.textContent += `${nkey} set to black\n`;
+                      continue; //out of bounds
+                    }
+                    const currVal = getVal(currC, currR);
+                    if (currVal === null) break; //undecided
+                    if (currVal === 0) 
+                    {
+                      const nkey = `${nc},${nr}`;
+                      assigned[nkey] = [0]; //set to black
+                      console.log("5.2====================="+nkey+" set to black");
+                      debugArea.textContent += `${nkey} set to black\n`;
+                      continue;
+                    }
+                    if (currVal === 1 && init_grid[currC][currR] > 0 && length != init_grid[currC][currR]) 
+                    {
+                      const nkey = `${nc},${nr}`;
+                      assigned[nkey] = [0]; //set to black
+                      console.log("5.3====================="+nkey+" set to black");
+                      debugArea.textContent += `${nkey} set to black\n`;
+                      continue;
+                    }
+                    //advance
+                  }
+                }
+              }
+            }*/
           }
         }
         /*
@@ -641,12 +773,7 @@
         //print grid
         //console.log("Validating... grid=" + JSON.stringify(localgrid));
 
-        const getVal = (c, r) => {
-          if (r < 0 || r >= rows || c < 0 || c >= cols) return 0;
-          const key = `${c},${r}`;
-          if (assigned[key] !== undefined) return assigned[key][0];
-          return null;
-        };
+
         const printAssign = () => {
           let text = '';
           for (let r = 0; r < rows; r++) {
@@ -677,16 +804,24 @@
             }
           }
         }
+        //check every vell with number's neightbor first
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const cell = init_grid[c][r];
+            
+          }
+        }
+
         // 2. Cell Constraints
         let debug = 0;
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
             debug = 0
-            
+            /*
             if (c == 1 && r == 0) debug = 1;
             if (c == 4 && r == 1) debug = 1;
             if (c == 6 && r == 1) debug = 1;
-
+*/
             const val = getVal(c, r);
             //if (val === null ) continue;
             const cell = init_grid[c][r];
@@ -742,6 +877,10 @@
                 return false;
               }
             }
+            if (cell > 0 )
+            {
+              
+            }
             if (cell > 0 && white === 1) {
               //set other direction to black
               for (const n of neighbors) {
@@ -795,6 +934,14 @@
                 console.log(`10=====================Cell at ${c},${r} line ends on white cell at ${endC},${endR}`);
                 debugArea.textContent += `Cell at ${c},${r} line ends on white cell at ${endC},${endR}\n`;
                 return false;
+              }
+              else if (endVal === null) 
+              {
+                if(endC+dx >=0 && endC+dx < cols && endR+dy >=0 && endR+dy < rows)
+                {
+                const nkey = `${endC+dx},${endR+dy}`;
+                assigned[nkey] = [0]; //set to black
+                }
               }
               //const nkey = `${endC},${endR}`;
               //assigned[nkey] = [0]; //set to black
