@@ -111,6 +111,7 @@
       let pzprPuzzle = null;
       let init_grid = [];
       let grid = [];
+      let dbg_log = '';
 
       const setStatus = (msg) => statusEl.textContent = msg;
 
@@ -153,35 +154,7 @@
       // though without canvases they can't be debugged easily. 
       // For this refactor, we focus on the URL loading part.
 
-      function detectGridLines(bwMat) {
-        // ... (Logic same as before, but we need bwMat)
-        // Since we removed Threshold canvas, we must process in memory or use hidden canvas if we want to support OCR.
-        // For now, we assume OCR flow uses 'orig' and does processing in memory if needed, 
-        // but the user asked to "move OCR part" (maybe meaning replace?). 
-        // We will keep the OCR logic but it might fail without the intermediate canvases if they were used for storage.
-        // Actually, the previous code used 'thresh' canvas for OCR splitting.
-        // We need to create an offscreen canvas for 'thresh' if we want to keep OCR working.
-        return { rows: 10, cols: 10, rowLines: [], colLines: [], auto: false }; // Placeholder if OCR is secondary now
-      }
 
-      // We'll keep the OCR logic structure but it won't work fully without the 'thresh' canvas unless we recreate it dynamically.
-      // Given the user's request is focused on the pzv URL flow, we prioritize that.
-
-      async function handleImage(img) {
-        setStatus('Processing image...');
-        pzprDiv.style.display = 'none';
-        orig.style.display = 'block';
-        drawImageToCanvas(img, orig);
-
-        //handle solution
-        pzprSolution.style.display = 'none';
-        solution.style.display = 'block';
-        drawImageToCanvas(img, solution);
-        // We can still do OpenCV processing if needed, but for now we just show the image.
-        // If the user wants OCR on this image, we'd need to restore the pipeline.
-        // Assuming "Original should show content" is the main goal for now.
-        setStatus('Image loaded.');
-      }
 
       async function handlePzprUrl(url) {
         setStatus('Loading puzzle from URL...');
@@ -508,13 +481,14 @@
         const cols = grid.length;  // grid is [x][y] so length is cols
         const rows = grid[0].length;  // grid[0].length is rows
         setStatus('Solving...');
-        setTimeout(() => runCSP(grid, rows, cols), 150);
+        setTimeout(() => runCSP(init_grid, rows, cols), 150);
       });
 
       function visualize(assigned) {
 
-        console.log("vis->" + JSON.stringify(assigned));
-
+       // console.log("in vis assign = " + JSON.stringify(assigned));
+        grid = init_grid.map(row => row.slice());
+        //console.log("vis->" + JSON.stringify(grid));
         var appBanners = document.getElementsByClassName('svgblock');
         for (var i = 0; i < appBanners.length; i++) {
           appBanners[i].style.display = 'none';
@@ -603,13 +577,14 @@
           validate: (assigned, unassigned) => validateNuri(assigned, unassigned, grid, rows, cols)
         };
         problem.cb = visualize
-        problem.timeStep = 1;
+        problem.timeStep = 20;
         try {
           //visualize(assigned);
           const result = csp.solve(problem);
           if (result === 'FAILURE') {
             setStatus('No solution found.');
-            debugArea.textContent = 'No solution found.';
+            debugArea.textContent += 'No solution found.';
+            //console.log(dbg_log);
           } else {
             setStatus('Solved!');
             debugArea.textContent = '\n\nSolution:\n' + JSON.stringify(result, null, 2);
@@ -620,6 +595,9 @@
           setStatus('Error: ' + e.message);
         }
       }
+//print assign
+//
+
 
       function validateNuri(assigned, unassigned, grid, rows, cols) {
         // ... (Existing validation logic)
@@ -628,23 +606,50 @@
         // See actual replacement content below.
         let localgrid = [];
         localgrid = Array(cols).fill(null).map(() => Array(rows).fill('.'));  // [x][y] = [cols][rows]
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const cell = init_grid[c][r];
+            //if (cell.type === 'number' || cell.type === 'circle') variables[`${r},${c}`] = [1];
+            if (cell > 0 || cell === -1) 
+              assigned[`${c},${r}`]=[1];
+              //assigned.push([`${c},${r}`],[1]);
+          }
+        }
+        /*
+        assigned['0,0']=[0];
+        assigned['2,0']=[1];
+        assigned['3,0']=[1];
+        assigned['4,0']=[1];
+        assigned['5,0']=[1];
+        assigned['6,0']=[1];
+        assigned['0,1']=[0];
+        assigned['1,1']=[0];
+        assigned['2,1']=[1];
+        assigned['3,1']=[0];
+        assigned['5,1']=[0];
+        assigned['6,1']=[0];
+        assigned['7,1']=[0];*/
+        
         for (const key in assigned) {
 
           var solution = assigned[key][0];
           //console.log(key+" = "+solution);
+          //debugArea.textContent += key+" = "+solution + '\n';
           //solution = c,r
           var parts = key.split(',');
           var x = parts[0];
           var y = parts[1];
 
           if (solution == 1) {
-            localgrid[x][y] = init_grid[x][y];
+            //localgrid[x][y] = 'init_grid[x][y]';
           }
           else {
             localgrid[x][y] = 'B';
           }
 
         }
+        console.log("=========")
+        debugArea.textContent += "======================\n"
 
         //print grid
         //console.log("Validating... grid=" + JSON.stringify(localgrid));
@@ -655,13 +660,33 @@
           if (assigned[key] !== undefined) return assigned[key][0];
           return null;
         };
+        const printAssign = () => {
+          let text = '';
+          for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+              const val = getVal(c, r);
+              if (val === null) text += '? ';
+              else text += val + ' ';
+            }
+            text += '\n';
+          }
+          console.log(text);
+          debugArea.textContent += text + '\n';
+        };
+        printAssign()
+
         // 1. Check 2x2
         for (let r = 0; r < rows - 1; r++) {
           for (let c = 0; c < cols - 1; c++) {
             const v1 = getVal(c, r), v2 = getVal(c + 1, r), v3 = getVal(c, r + 1), v4 = getVal(c + 1, r + 1);
             if (v1 !== null && v2 !== null && v3 !== null && v4 !== null) {
               const sum = v1 + v2 + v3 + v4;
-              if (sum === 0 || sum === 4) return false;
+              if (sum === 0 || sum === 4) 
+              {
+                console.log(`======================2x2 violation at ${c},${r} with values ${v1},${v2},${v3},${v4}`);
+                debugArea.textContent += `2x2 violation at ${c},${r} with values ${v1},${v2},${v3},${v4}\n`;
+                return false;
+              }
             }
           }
         }
@@ -670,12 +695,20 @@
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
             debug = 0
-            if (c == 2 && r == 0) debug = 0;
+            
+            if (c == 1 && r == 0) debug = 1;
+            if (c == 4 && r == 1) debug = 1;
+            if (c == 6 && r == 1) debug = 1;
 
             const val = getVal(c, r);
-            if (val === null || val === 0) continue;
-            const cell = localgrid[c][r];
-            const neighbors = [{ c: c - 1, r: r }, { c: c + 1, r: r }, { c: c, r: r - 1 }, { c: c, r: r + 1 }];
+            //if (val === null ) continue;
+            const cell = init_grid[c][r];
+            const neighbors = [{ c: c - 1, r: r }, { c: c + 1, r: r }, { c: c, r: r - 1 }, { c: c, r: r + 1 }].filter(n =>
+              n.c >= 0 && n.c < cols &&
+              n.r >= 0 && n.r < rows
+            );
+            //exclude out of boundary
+
             let white = 0, pot = 0;
             let nc = 0, nr = 0;
             for (const n of neighbors) {
@@ -689,23 +722,50 @@
             }
             //            if (cell === 'circle' || cell.type === 'number') {
             if (cell == -1 || cell > 0) {
-              if (white > 1) return false;
-              if (white + pot < 1) return false;
-              if (pot === 0 && white !== 1) return false;
+              if(val != 1) console.log(`1=====================Cell at ${c},${r} expected to be white but got ${val}`);
+              if (white > 1)
+              {
+                console.log(`2=====================Cell at ${c},${r} has too many white neighbors: ${white}`);
+                debugArea.textContent += `Cell at ${c},${r} has too many white neighbors: ${white}\n`;
+                return false;
+              }
+              if (white + pot < 1)
+              {
+                console.log(`3=====================Cell at ${c},${r} cannot reach 1 white neighbor: white=${white}, pot=${pot}`);
+                debugArea.textContent += `Cell at ${c},${r} cannot reach 1 white neighbor: white=${white}, pot=${pot}\n`;
+                return false;
+              }
+              if (pot === 0 && white !== 1)
+              {
+                console.log(`4=====================Cell at ${c},${r} has no potential neighbors but white=${white}`);
+                debugArea.textContent += `Cell at ${c},${r} has no potential neighbors but white=${white}\n`;
+                return false;
+              }
 
               if (debug == 1) {
-                console.log(`At cell ${c},${r} with cell=${cell}, white=${white}, pot=${pot}`);
+                dbg_log += `At cell ${c},${r} with cell=${cell}, white=${white}, pot=${pot}\n`;
+//                console.log(`At cell ${c},${r} with cell=${cell}, white=${white}, pot=${pot}`);
               }
             }
-            else if (cell !== 'B') {
-              if (white + pot < 2) return false;        // 就算未來全變白也湊不到 2
+            else if (val == 1){//(cell !== 'B') {
+              if (white + pot < 2)        // 就算未來全變白也湊不到 2
+              {
+                console.log(`5=====================White cell at ${c},${r} cannot reach 2 white neighbors: white=${white}, pot=${pot}`);
+                debugArea.textContent += `White cell at ${c},${r} cannot reach 2 white neighbors: white=${white}, pot=${pot}\n`;
+                return false;
+              }
             }
             if (cell > 0 && white === 1) {
               //set other direction to black
               for (const n of neighbors) {
                 if (n.c === nc && n.r === nr) continue;
                 const nv = getVal(n.c, n.r);
-                if (nv === 1) return false
+                if (nv === 1) 
+                {
+                console.log(`6=====================Cell at ${c},${r} has multiple white neighbors when length=${cell}`);
+                debugArea.textContent += `Cell at ${c},${r} has multiple white neighbors when length=${cell}\n`;
+                return false;
+                }
 
               }
               // Number logic (simplified for length)
@@ -714,21 +774,41 @@
               //use nc,nr c r to trace the line
               const dx = nc - c;
               const dy = nr - r;
-              if (Math.abs(dx) + Math.abs(dy) !== 1) return false; //invalid
+              if (Math.abs(dx) + Math.abs(dy) !== 1) 
+              {
+                console.log(`7=====================Cell at ${c},${r} has non-adjacent white neighbor at ${nc},${nr}`);
+                debugArea.textContent += `Cell at ${c},${r} has non-adjacent white neighbor at ${nc},${nr}\n`;
+                return false;
+              }
               for (let step = 1; step < length; step++) {
                 const currR = r + dy * step;
                 const currC = c + dx * step;
                 const currVal = getVal(currC, currR);
                 if (currVal === null) break; //undecided
-                if (currVal === 0) return false; //hit black
+                if (currVal === 0) 
+                {
+                  console.log(`8=====================Cell at ${c},${r} line blocked at ${currC},${currR} before reaching length ${length}`);
+                  debugArea.textContent += `Cell at ${c},${r} line blocked at ${currC},${currR} before reaching length ${length}\n`;
+                  return false;
+                }
                 //advance
               }
-              const endR = r + dy * length;
-              const endC = c + dx * length;
-              if (endR < 0 || endR >= rows || endC < 0 || endC >= cols) return false; //out of bounds
-              const endVal = getVal(endC, endR);
+              const endR = r + dy * (length-1);
+              const endC = c + dx * (length-1);
+              if (endR < 0 || endR >= rows || endC < 0 || endC >= cols) 
+              {
+                console.log(`9=====================Cell at ${c},${r} line goes out of bounds at ${endC},${endR}`);
+                debugArea.textContent += `Cell at ${c},${r} line goes out of bounds at ${endC},${endR}\n`;
+                return false;
+              }
+              const endVal = getVal(endC+dx, endR+dy);
 
-              if (endVal === 1) return false; //end on white
+              if (endVal === 1)  //end on white
+              {
+                console.log(`10=====================Cell at ${c},${r} line ends on white cell at ${endC},${endR}`);
+                debugArea.textContent += `Cell at ${c},${r} line ends on white cell at ${endC},${endR}\n`;
+                return false;
+              }
               //const nkey = `${endC},${endR}`;
               //assigned[nkey] = [0]; //set to black
 
@@ -737,10 +817,6 @@
         }
 
         // 3. Connectivity Check (Relaxed for partial assignments)
-        // We only require that all "Must-Connect" components (Assigned White cells & Circles)
-        // are connected to each other via the "Stream" (White/Unassigned paths).
-        // Isolated islands of Unassigned cells are allowed (they will become Black).
-
         let targets = []; // Cells that MUST be connected
         for (let r = 0; r < rows; r++) {
           for (let c = 0; c < cols; c++) {
