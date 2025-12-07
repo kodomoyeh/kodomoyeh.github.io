@@ -112,18 +112,11 @@
       let init_grid = [];
       let grid = [];
       let dbg_log = '';
+      let vis_count = 0;
 
       const setStatus = (msg) => statusEl.textContent = msg;
 
-      const loadImage = (src) => new Promise((resolve, reject) => {
-        const img = new Image();
-        if (window.location.protocol !== 'file:' && !src.startsWith('file:')) {
-          img.crossOrigin = 'anonymous';
-        }
-        img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error('Cannot load image'));
-        img.src = src;
-      });
+
 
       const drawImageToCanvas = (img, canvas) => {
         const ctx = canvas.getContext('2d');
@@ -133,13 +126,6 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0, w, h);
       };
-
-      async function ensureWorker() {
-        if (worker) return worker;
-        worker = await Tesseract.createWorker('eng');
-        await worker.setParameters({ tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.' });
-        return worker;
-      }
 
       function makeEvenLines(size, count) {
         const lines = [];
@@ -466,9 +452,7 @@
 
         if (url.includes('pzv.jp') || url.includes('nurimisaki')) {
           handlePzprUrl(url);
-        } else {
-          loadImage(url).then(handleImage).catch(err => setStatus(err.message));
-        }
+        } 
       });
 
       const solveBtn = document.getElementById('solveBtn');
@@ -483,9 +467,10 @@
         setStatus('Solving...');
         setTimeout(() => runCSP(init_grid, rows, cols), 150);
       });
-
+      
       function visualize(assigned) {
-
+        vis_count++;
+        debugArea.textContent += '\n\nVisualization step ' + vis_count 
        // console.log("in vis assign = " + JSON.stringify(assigned));
         grid = init_grid.map(row => row.slice());
         //console.log("vis->" + JSON.stringify(grid));
@@ -577,7 +562,7 @@
           validate: (assigned, unassigned) => validateNuri(assigned, unassigned, grid, rows, cols)
         };
         problem.cb = visualize
-        problem.timeStep = 20;
+        problem.timeStep = 1;
         try {
           //visualize(assigned);
           const result = csp.solve(problem);
@@ -587,7 +572,9 @@
             //console.log(dbg_log);
           } else {
             setStatus('Solved!');
+            
             debugArea.textContent = '\n\nSolution:\n' + JSON.stringify(result, null, 2);
+            debugArea.textContent += '\n\nTotal steps: ' + vis_count + '\n';
             //drawSolution(result, grid, rows, cols);
 
           }
@@ -673,7 +660,7 @@
           console.log(text);
           debugArea.textContent += text + '\n';
         };
-        printAssign()
+        //printAssign()
 
         // 1. Check 2x2
         for (let r = 0; r < rows - 1; r++) {
