@@ -561,10 +561,13 @@
               variables[`${c},${r}`] = [1];
             else 
               variables[`${c},${r}`] = [0, 1]; //1 for white , 0 for black
-          
+          }
+        }
             let debug = 0;
             //if(c == 0 && r ==2) debug=1;
-
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const cell = grid[c][r];
             console.log("cell at "+c+","+r+" = "+cell);
             if(cell > 0)
             {
@@ -599,6 +602,7 @@
                       variables[nkey] = [0]; //set to black
                       console.log("5.1====================="+nkey+" set to black");
                       debugArea.textContent += `${nkey} set to black\n`;
+                      //r=0; c=0;
                       continue; //out of bounds
                     }
                     const currVal = grid[currC][currR];
@@ -609,6 +613,7 @@
                       variables[nkey] = [0]; //set to black
                       console.log("5.2====================="+nkey+" set to black");
                       debugArea.textContent += `${nkey} set to black\n`;
+                      //r=0; c=0;
                       continue;
                     }
                     if ( grid[currC][currR] > 0 && length != grid[currC][currR]) 
@@ -617,6 +622,7 @@
                       variables[nkey] = [0]; //set to black
                       console.log("5.3====================="+nkey+" set to black");
                       debugArea.textContent += `${nkey} set to black\n`;
+                      //r=0; c=0;
                       continue;
                     }
                     //advance
