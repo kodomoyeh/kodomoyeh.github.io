@@ -564,9 +564,18 @@
           }
         }
             let debug = 0;
-            //if(c == 0 && r ==2) debug=1;
-        for (let r = 0; r < rows; r++) {
+            
+            let recursive_count = 10;
+        while(recursive_count >0)
+        {
+          recursive_count--;
+          console.log("===recursive_count="+recursive_count);
+        for (let r = 0; r < rows ; r++) {
           for (let c = 0; c < cols; c++) {
+
+            debug=0;
+            //if(c == 3 && r ==4) debug=1;
+            //if(c == 0 && r ==2) debug=1;
             const cell = grid[c][r];
             console.log("cell at "+c+","+r+" = "+cell);
             if(cell > 0)
@@ -590,6 +599,8 @@
                   console.log("length="+length+"typeof length="+typeof length);
                   const dx = nc - c;
                   const dy = nr - r;
+                  if(debug==1)
+                    console.log("dx="+dx+", dy="+dy);
                   for (let step = 1; step < length; step++) {
                     const currR = r + dy * step;
                     const currC = c + dx * step;
@@ -602,27 +613,41 @@
                       variables[nkey] = [0]; //set to black
                       console.log("5.1====================="+nkey+" set to black");
                       debugArea.textContent += `${nkey} set to black\n`;
-                      //r=0; c=0;
+        
                       continue; //out of bounds
                     }
                     const currVal = grid[currC][currR];
-//                    if (currVal === '.') break; //undecided
-                    if (currVal === 0) 
+
+                    //if (currVal === 0) 
+                    if(debug==1)
                     {
-             
+                      console.log("currVal at "+currC+","+currR+" is "+currVal);
+                      console.log("variables at "+currC+","+currR+" is "+JSON.stringify(variables[`${currC},${currR}`]));
+                      console.log("length = "+variables[`${currC},${currR}`].length);
+                    }
+                    
+                    if(variables[`${currC},${currR}`].length ==1 && variables[`${currC},${currR}`][0] == 0)
+                    {
+                      
+                      console.log("currVal at "+currC+","+currR+" is black");
+                      console.log("setting "+nkey+" to black");
+                      
+                      debugArea.textContent += `${nkey} set to black\n`;
+      
                       variables[nkey] = [0]; //set to black
                       console.log("5.2====================="+nkey+" set to black");
                       debugArea.textContent += `${nkey} set to black\n`;
-                      //r=0; c=0;
+      
                       continue;
                     }
+    
                     if ( grid[currC][currR] > 0 && length != grid[currC][currR]) 
                     {
            
                       variables[nkey] = [0]; //set to black
                       console.log("5.3====================="+nkey+" set to black");
                       debugArea.textContent += `${nkey} set to black\n`;
-                      //r=0; c=0;
+             
                       continue;
                     }
                     //advance
@@ -635,6 +660,7 @@
 
           }
         }
+      }
         console.log("variables=" + JSON.stringify(variables));
         const problem = {
           variables, constraints,
