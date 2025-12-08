@@ -597,7 +597,7 @@
 
                 if (nv === ".") 
                 {
-                  console.log("length="+length+"typeof length="+typeof length);
+                  //console.log("length="+length+"typeof length="+typeof length);
                   const dx = nc - c;
                   const dy = nr - r;
                   if(debug==1)
@@ -608,6 +608,7 @@
 
                     if(debug==1)
                       console.log("checking step "+step+" at "+currC+","+currR);
+                    //往外打不能超過邊界
                     if (currR < 0 || currR >= rows || currC < 0 || currC >= cols)
                     {
                       
@@ -627,6 +628,7 @@
                       console.log("length = "+variables[`${currC},${currR}`].length);
                     }
                     
+                    //往外打不能碰到黑的
                     if(variables[`${currC},${currR}`].length ==1 && variables[`${currC},${currR}`][0] == 0)
                     {
                       
@@ -641,18 +643,46 @@
       
                       continue;
                     }
-    
-                    if ( grid[currC][currR] > 0 && length != grid[currC][currR]) 
+                    //往外打不能碰到 數字或白圈
+                    if (grid[currC][currR] > 0 || grid[currC][currR] == -1) 
                     {
-           
+                      if (step < length-1)
+                      {
                       variables[nkey] = [0]; //set to black
                       console.log("5.3====================="+nkey+" set to black");
                       debugArea.textContent += `${nkey} set to black\n`;
+                      }
+                      else if(step == length-1)
+                      {
+                        if (grid[currC][currR] > 0 && length != grid[currC][currR])
+                        {
+                          variables[nkey] = [0]; //set to black
+                          console.log("5.4====================="+nkey+" set to black");
+                          debugArea.textContent += `${nkey} set to black\n`;
+                        }
+
+                      }
              
                       continue;
                     }
                     //advance
                   }
+                  const endR = r + dy * length;
+                  const endC = c + dx * length;
+                  //尾巴必須是邊界或者黑 所以或是數字或白圈就不行
+                  if (endR >= 0 && endR < rows && endC >= 0 && endC < cols)
+                  {
+                    if ( grid[endC][endR] > 0 || grid[endC][endR] == -1) 
+                    {
+            
+                      variables[nkey] = [0]; //set to black
+                      console.log("5.5====================="+nkey+" set to black");
+                      debugArea.textContent += `${nkey} set to black\n`;
+              
+                      continue;
+                    }
+                  }
+                  
                 }
               }
             }
@@ -716,55 +746,7 @@
             //if (cell > 0 || cell === -1) 
              // assigned[`${c},${r}`]=[1];
               //assigned.push([`${c},${r}`],[1]);
-            /*if(cell > 0)
-            {
-              const neighbors = [{ c: c - 1, r: r }, { c: c + 1, r: r }, { c: c, r: r - 1 }, { c: c, r: r + 1 }].filter(n =>
-                n.c >= 0 && n.c < cols &&
-                n.r >= 0 && n.r < rows
-              );
-              let nc = 0, nr = 0;
-              for (const n of neighbors) {
-                const nv = getVal(n.c, n.r);
-                if (nv === null) 
-                {
-                  nc = n.c
-                  nr = n.r
-                  const dx = nc - c;
-                  const dy = nr - r;
-                  for (let step = 1; step < length; step++) {
-                    const currR = r + dy * step;
-                    const currC = c + dx * step;
-                    if (currR < 0 || currR >= rows || currC < 0 || currC >= cols)
-                    {
-                      const nkey = `${nc},${nr}`;
-                      assigned[nkey] = [0]; //set to black
-                      console.log("5.1====================="+nkey+" set to black");
-                      debugArea.textContent += `${nkey} set to black\n`;
-                      continue; //out of bounds
-                    }
-                    const currVal = getVal(currC, currR);
-                    if (currVal === null) break; //undecided
-                    if (currVal === 0) 
-                    {
-                      const nkey = `${nc},${nr}`;
-                      assigned[nkey] = [0]; //set to black
-                      console.log("5.2====================="+nkey+" set to black");
-                      debugArea.textContent += `${nkey} set to black\n`;
-                      continue;
-                    }
-                    if (currVal === 1 && init_grid[currC][currR] > 0 && length != init_grid[currC][currR]) 
-                    {
-                      const nkey = `${nc},${nr}`;
-                      assigned[nkey] = [0]; //set to black
-                      console.log("5.3====================="+nkey+" set to black");
-                      debugArea.textContent += `${nkey} set to black\n`;
-                      continue;
-                    }
-                    //advance
-                  }
-                }
-              }
-            }*/
+            
           }
         }
         /*
