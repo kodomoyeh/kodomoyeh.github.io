@@ -193,17 +193,26 @@ body {
 
         document.getElementById('b1').style.backgroundColor = '#999999';
         document.getElementById('output1').innerHTML = 'sending...';
-        const res = await fetch('https://api.minimax.chat/v1/video_generation', {
+        const res = await fetch('https://api.minimax.chat/v2/video_generation', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer '+auth
             },
             body: JSON.stringify({
-                "model": "MiniMax-Hailuo-2.3-Fast",
-                "prompt": prompt,
-                "duration" : 10,
-                "first_frame_image": img
+                "model": "MiniMax-H3",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": prompt
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": { "url": img },
+                        "role": "first_frame"
+                    }
+                ],
+                "duration" : 15
             })
         });
         document.getElementById('b1').style.backgroundColor = '#4CAF50';
@@ -225,7 +234,7 @@ body {
         task_id = getTask();
         if (!task_id) { alert('請先送出 video_generation 取得 task_id'); return; }
 
-        const url = `https://api.minimax.chat/v1/query/video_generation?task_id=${task_id}`;
+        const url = `https://api.minimax.chat/v2/query/video_generation/${task_id}`;
 
         document.getElementById('b2').style.backgroundColor = '#999999';
         document.getElementById('output2').innerHTML = 'sending...';
